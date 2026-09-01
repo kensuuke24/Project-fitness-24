@@ -1,0 +1,2265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Fitness XXIV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FF5A1F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fitness XXIV">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png" type="image/png">
+<style>
+  :root {
+    --bg: #F3F5F7;
+    --card: #FFFFFF;
+    --ink: #1C2127;
+    --sub: #667085;
+    --line: #E2E6EB;
+    --accent: #FF5A1F;
+    --accent-ink: #FFFFFF;
+    --done-bg: #E8F7EE;
+    --shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(28,33,39,.06), 0 1px 2px rgba(28,33,39,.04), 0 12px 26px -16px rgba(28,33,39,.16);
+    --shadow-hover: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(28,33,39,.08), 0 2px 4px rgba(28,33,39,.06), 0 16px 32px -14px rgba(28,33,39,.2);
+  }
+  [data-theme="dark"] {
+    --bg: #14171C;
+    --card: #1D2128;
+    --ink: #F1F3F5;
+    --sub: #96A0AD;
+    --line: #2C323B;
+    --accent: #FF7A45;
+    --accent-ink: #14171C;
+    --done-bg: #1B2A22;
+    --shadow: inset 0 1px 0 rgba(255,255,255,.04), inset 0 -1px 0 rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.4), 0 14px 28px -16px rgba(0,0,0,.6);
+    --shadow-hover: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -1px 0 rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.45), 0 18px 34px -14px rgba(0,0,0,.65);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      repeating-linear-gradient(135deg, color-mix(in srgb, var(--ink) 2.5%, transparent) 0px, color-mix(in srgb, var(--ink) 2.5%, transparent) 1px, transparent 1px, transparent 14px);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.5;
+    transition: background .25s ease, color .25s ease;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
+  @keyframes app-reveal { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
+  .wrap.reveal { animation: app-reveal .8s cubic-bezier(.22,1,.36,1) both; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .brand-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; font-weight: 600; }
+  h1 { font-family: 'Anton', sans-serif; font-size: 38px; letter-spacing: .03em; margin: 0; line-height: .96; text-transform: uppercase; -webkit-text-stroke: .5px color-mix(in srgb, var(--ink) 40%, transparent); }
+  .theme-toggle {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 6px 6px 14px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--sub); letter-spacing: .05em; text-transform: uppercase; user-select: none;
+  }
+  .theme-toggle .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: var(--accent-ink); font-size: 13px; }
+  .theme-toggle.muted .dot { background: var(--sub); opacity: .6; }
+  .footer-mark { display: flex; justify-content: center; margin-top: 26px; opacity: .8; }
+
+  .quote-row { display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; }
+  .quote-text { font-size: 13px; font-style: italic; color: var(--sub); flex: 1; }
+  .shuffle-btn { border: 1px solid var(--line); background: transparent; color: var(--sub); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
+  .shuffle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .theme-swatches { display: flex; gap: 8px; margin: 0 0 20px; }
+  .swatch { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .15s ease, border-color .15s ease; }
+  .swatch:hover { transform: scale(1.15); }
+  .swatch.active { border-color: var(--ink); }
+
+  .score {
+    display: flex; align-items: baseline; gap: 10px; font-family: 'IBM Plex Mono', monospace;
+    color: var(--sub); font-size: 12px; letter-spacing: .04em; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .score b { color: var(--ink); font-size: 15px; font-weight: 600; }
+  .streak-flag { color: var(--accent); font-weight: 600; }
+
+  .level-card {
+    display: flex; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; box-shadow: var(--shadow);
+    transition: box-shadow .2s ease, border-color .25s ease, background .25s ease;
+  }
+  .avatar-ring-wrap { position: relative; width: 68px; height: 68px; flex-shrink: 0; }
+  .avatar-ring-wrap svg.ring { position: absolute; top: 0; left: 0; width: 68px; height: 68px; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--done-bg); stroke-width: 4; }
+  .ring-fill { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .3s ease; }
+  .level-avatar { width: 48px; height: 56px; position: absolute; top: 6px; left: 10px; }
+  .level-avatar.bounce { animation: avatar-pop .5s ease; }
+  @keyframes avatar-pop { 0%{ transform: scale(1); } 35%{ transform: scale(1.3); } 65%{ transform: scale(0.92); } 100%{ transform: scale(1); } }
+  @keyframes day-fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  .card.day-fade { animation: day-fade-in .28s ease; }
+  .level-info { flex: 1; min-width: 0; }
+  .level-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; gap: 8px; }
+  .level-name { font-family: 'Anton', sans-serif; font-size: 20px; letter-spacing: .03em; white-space: nowrap; text-transform: uppercase; }
+  .level-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+  .xp-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--sub); margin-top: 2px; }
+  .name-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; border: none; border-bottom: 1px dashed var(--line); background: transparent; color: var(--sub); width: 110px; margin-top: 4px; padding: 2px 0; }
+  .name-input:focus { outline: none; border-bottom-color: var(--accent); color: var(--ink); }
+
+  .badge-shelf { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .badge { display: flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--sub); background: var(--card); opacity: .55; transition: opacity .2s ease, transform .2s ease; }
+  .badge.unlocked { border-color: var(--accent); color: var(--accent); opacity: 1; }
+  .badge.unlocked:hover { transform: translateY(-1px); }
+
+  .confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+  .confetti-piece { position: absolute; top: -20px; width: 8px; height: 14px; opacity: .9; border-radius: 2px; animation-name: confetti-fall; animation-timing-function: ease-in; animation-fill-mode: forwards; }
+  @keyframes confetti-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+  }
+
+  .blast-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1000; overflow: hidden; }
+  .blast-flash {
+    position: absolute; inset: 0; background: var(--accent); opacity: 0;
+    animation: blast-flash-anim .5s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes blast-flash-anim {
+    0% { opacity: 0; }
+    8% { opacity: .85; }
+    100% { opacity: 0; }
+  }
+  .blast-ring {
+    position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; border-radius: 50%;
+    border: 4px solid var(--accent); transform: translate(-50%,-50%) scale(0); opacity: 1;
+    animation: blast-ring-anim .7s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @keyframes blast-ring-anim {
+    0% { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+    100% { transform: translate(-50%,-50%) scale(60); opacity: 0; }
+  }
+  .blast-shard {
+    position: absolute; top: 50%; left: 50%; width: 6px; height: 20px; border-radius: 2px;
+    background: var(--accent); opacity: 1;
+    animation: blast-shard-anim .8s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @keyframes blast-shard-anim {
+    0% { transform: translate(-50%,-50%) rotate(var(--ang)) translateY(0) scale(1); opacity: 1; }
+    100% { transform: translate(-50%,-50%) rotate(var(--ang)) translateY(-260px) scale(.3); opacity: 0; }
+  }
+  @keyframes screen-shake {
+    0%, 100% { transform: translate(0,0); }
+    10% { transform: translate(-10px,-6px) rotate(-.4deg); }
+    20% { transform: translate(9px,5px) rotate(.4deg); }
+    30% { transform: translate(-8px,6px) rotate(-.3deg); }
+    40% { transform: translate(8px,-5px) rotate(.3deg); }
+    50% { transform: translate(-6px,4px) rotate(-.2deg); }
+    60% { transform: translate(6px,-4px) rotate(.2deg); }
+    70% { transform: translate(-4px,3px); }
+    80% { transform: translate(4px,-2px); }
+    90% { transform: translate(-2px,1px); }
+  }
+  .wrap.shaking { animation: screen-shake .5s cubic-bezier(.36,.07,.19,.97) both; }
+
+  .week-motivation {
+    background: color-mix(in srgb, var(--accent) 10%, var(--card));
+    border: 1px solid var(--accent); border-radius: 12px; padding: 14px 16px; margin-bottom: 24px;
+    box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 10px;
+  }
+  .week-motivation .wm-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+  .week-motivation .wm-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
+  .week-motivation .wm-text { font-size: 14px; color: var(--ink); margin: 0; font-style: italic; }
+
+  .deload-banner {
+    background: color-mix(in srgb, var(--sub) 12%, var(--card));
+    border: 1px solid var(--sub); border-radius: 12px; padding: 14px 16px; margin-bottom: 24px;
+    box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 10px;
+  }
+  .deload-banner .db-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+  .deload-banner .db-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--sub); margin: 0 0 4px; }
+  .deload-banner .db-text { font-size: 14px; color: var(--ink); margin: 0; }
+
+  .warmup-tip {
+    display: flex; align-items: flex-start; gap: 8px; background: var(--done-bg);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px;
+    font-size: 12.5px; color: var(--sub); line-height: 1.45;
+  }
+  .warmup-tip .wt-icon { flex-shrink: 0; font-size: 14px; line-height: 1.3; }
+  .warmup-tip b { color: var(--ink); }
+
+  .ex-log { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 6px; width: 100%; }
+  .ex-log-last { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--sub); }
+  .ex-log-date { opacity: .7; }
+  .ex-log-input {
+    flex: 1 1 100px; min-width: 90px; max-width: 100%; box-sizing: border-box;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    border: 1px dashed var(--line); background: transparent; color: var(--ink);
+    border-radius: 6px; padding: 5px 8px;
+  }
+  .ex-log-input:focus { outline: none; border-color: var(--accent); }
+  .ex-log-input::placeholder { color: var(--sub); }
+
+  .strip { display: flex; gap: 6px; margin-bottom: 24px; }
+  .daybtn {
+    flex: 1; padding: 10px 2px 8px; text-align: center; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 4px; background: var(--card);
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .04em; color: var(--sub);
+    text-transform: uppercase; font-weight: 600;
+    position: relative; transition: all .15s ease;
+  }
+  .daybtn:hover { border-color: var(--accent); color: var(--ink); }
+  .daybtn.active { border-color: var(--accent); color: var(--ink); background: var(--card); box-shadow: inset 0 -2px 0 var(--accent); }
+  .daybtn .tick { display: block; font-size: 9px; margin-top: 3px; color: var(--accent); }
+  .daybtn.inactive-day { opacity: .45; border-style: dashed; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 22px 22px 6px; box-shadow: var(--shadow); transition: border-color .25s ease, background .25s ease; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .day-title { font-family: 'Anton', sans-serif; font-size: 30px; letter-spacing: .02em; text-transform: uppercase; }
+  .day-count { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--sub); margin-left: 8px; }
+  .routine-tags { display: inline-flex; gap: 6px; margin-left: 10px; vertical-align: middle; }
+  .tag-pill { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .05em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; font-weight: 600; cursor: pointer; opacity: .5; transition: opacity .15s ease, transform .15s ease; user-select: none; }
+  .tag-pill:hover { opacity: .8; }
+  .tag-pill.active { opacity: 1; }
+  .tag-default { background: var(--done-bg); color: var(--sub); border: 1px solid var(--line); }
+  .tag-recommended { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); border: 1px solid var(--accent); }
+  .card-note { font-size: 13px; color: var(--sub); margin: 0 0 12px; }
+
+  .inactive-toggle {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
+    border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; background: transparent; color: var(--sub); cursor: pointer;
+  }
+  .inactive-toggle.is-off { border-color: var(--accent); color: var(--accent); }
+  .rest-banner { font-size: 13px; color: var(--sub); background: var(--done-bg); border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0 16px; }
+  .card.dimmed .ex { opacity: .4; pointer-events: none; }
+
+  .ex { display: flex; align-items: center; gap: 12px; padding: 13px 10px; margin: 0 -10px; border-top: 1px solid var(--line); border-radius: 8px; cursor: pointer; transition: background .15s ease; }
+  .ex:first-of-type { border-top: 1px solid var(--line); }
+  .ex:hover { background: var(--done-bg); }
+  .box { width: 22px; height: 22px; border: 1.5px solid var(--sub); border-radius: 6px; background: var(--card); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s cubic-bezier(.34,1.56,.64,1); }
+  .ex:hover .box { border-color: var(--accent); }
+  .ex.done .box { background: var(--accent); border-color: var(--accent); transform: scale(1.06); }
+  .box svg { width: 13px; height: 13px; display: none; }
+  .ex.done .box svg { display: block; }
+  .ex-main { flex: 1; min-width: 0; }
+  .ex-name { font-size: 15px; }
+  .ex.done .ex-name { color: var(--sub); text-decoration: line-through; }
+  .ex-note { display: inline-block; font-size: 11.5px; font-weight: 500; color: var(--ink); margin-top: 5px; padding: 3px 9px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 26%, transparent); border-left: 3px solid var(--accent); }
+  .ex-reps { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--sub); white-space: nowrap; }
+  .ex-log-wrap { padding: 0 10px 12px 44px; margin-top: -8px; }
+  @media (max-width: 380px) {
+    .ex-log-wrap { padding-left: 10px; }
+  }
+  .icon-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: transparent; display: flex; align-items: center; justify-content: center; color: var(--sub); cursor: pointer; flex-shrink: 0; font-size: 13px; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.armed { border-color: var(--accent); color: var(--accent-ink); background: var(--accent); animation: armed-pulse 1s ease-in-out infinite; }
+  @keyframes armed-pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+
+  .lang-toggle {
+    display: flex; align-items: center; gap: 4px; margin-top: 8px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px; cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .04em; color: var(--sub); user-select: none; width: fit-content; margin-left: auto;
+  }
+  .lang-toggle span { padding: 3px 9px; border-radius: 999px; }
+  .lang-toggle span.on { background: var(--accent); color: var(--accent-ink); }
+
+  .clock-box { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink); letter-spacing: .04em; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; }
+
+  .streak-cal-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; box-shadow: var(--shadow); transition: border-color .25s ease, background .25s ease; }
+  .streak-cal-head { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--sub); margin: 0 0 10px; display: flex; align-items: center; gap: 6px; }
+  .streak-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .new-week-btn {
+    width: 100%; margin-top: 12px; padding: 9px; border: 1px dashed var(--line); border-radius: 8px;
+    background: transparent; color: var(--sub); font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; cursor: pointer; transition: border-color .15s ease, color .15s ease;
+  }
+  .new-week-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .streak-cal-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+  .streak-cal-cell.today { border-color: var(--accent); }
+  .streak-cal-cell.off { opacity: .4; border-style: dashed; }
+  .streak-cal-day { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .04em; text-transform: uppercase; color: var(--sub); }
+  .streak-cal-date { font-family: 'Anton', sans-serif; font-size: 15px; line-height: 1; }
+  .streak-cal-flame { font-size: 14px; height: 16px; opacity: .25; }
+  .streak-cal-cell.hit .streak-cal-flame { opacity: 1; }
+
+  .suggest-label { font-size: 11px; color: var(--sub); font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .04em; flex-basis: 100%; margin-bottom: 2px; }
+  .suggest-chips { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; margin-bottom: 4px; }
+  .suggest-chip { font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--sub); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .suggest-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .sug-info { border: none; background: transparent; color: inherit; opacity: .7; cursor: pointer; font-size: 12px; padding: 0; line-height: 1; }
+  .sug-info:hover { opacity: 1; color: var(--accent); }
+
+  .add-row { display: flex; align-items: center; gap: 10px; padding: 14px 0 16px; border-top: 1px solid var(--line); cursor: pointer; color: var(--accent); font-size: 14px; font-weight: 500; }
+  .add-row .plus-circle { width: 20px; height: 20px; border-radius: 50%; border: 1.5px dashed var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .add-form { display: none; flex-wrap: wrap; gap: 8px; padding: 4px 0 16px; border-top: 1px solid var(--line); }
+  .add-form.open { display: flex; }
+  .add-form input { font-family: 'Inter', sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  .add-form input:focus { outline: none; border-color: var(--accent); }
+  .add-form .fname { flex: 1; min-width: 120px; }
+  .add-form .freps { width: 84px; }
+  .add-form .fnote { flex-basis: 100%; }
+  .add-form .fsave { border: none; background: var(--accent); color: var(--accent-ink); border-radius: 6px; padding: 0 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .form-error { font-size: 12px; color: var(--accent); margin: -8px 0 12px; display: none; }
+  .form-error.show { display: block; }
+
+  .recap-card, .history-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 20px;
+    box-shadow: var(--shadow); transition: border-color .25s ease, background .25s ease;
+  }
+  .recap-head, .history-head { font-family: 'Anton', sans-serif; font-size: 18px; margin: 0; }
+  .history-head-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .recap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .recap-stat { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; transition: transform .15s ease, border-color .15s ease; }
+  .recap-stat:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .recap-num { font-family: 'Anton', sans-serif; font-size: 22px; }
+  .recap-label { font-size: 10px; color: var(--sub); font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .04em; }
+  .streak-icon { font-size: 13px; }
+
+  .history-list { max-height: 170px; overflow-y: auto; transition: max-height .2s ease; }
+  .history-list.collapsed { max-height: 44px; overflow: hidden; }
+  #historyToggleIcon { transition: transform .2s ease; }
+  #historyToggleBtn.open #historyToggleIcon { transform: rotate(180deg); }
+  .history-item { font-size: 12px; color: var(--sub); padding: 7px 0; border-top: 1px solid var(--line); font-family: 'IBM Plex Mono', monospace; }
+  .history-item:first-child { border-top: none; }
+  .history-empty { font-size: 12px; color: var(--sub); }
+
+  footer { margin-top: 26px; font-size: 11px; color: var(--sub); font-family: 'IBM Plex Mono', monospace; text-align: center; }
+  .copyright { margin-top: 8px; font-size: 10px; color: var(--sub); font-family: 'IBM Plex Mono', monospace; text-align: center; letter-spacing: .03em; opacity: .7; }
+
+  .start-over-card { margin-top: 24px; }
+  .start-over-btn {
+    display: block; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--sub); font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    letter-spacing: .05em; cursor: pointer; transition: all .15s ease;
+  }
+  .start-over-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .start-over-confirm {
+    display: none; margin-top: 10px; background: color-mix(in srgb, var(--accent) 10%, var(--card));
+    border: 1px solid var(--accent); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .start-over-text { font-size: 13px; color: var(--ink); margin: 0 0 12px; }
+  .start-over-actions { display: flex; gap: 8px; }
+  .start-over-yes, .start-over-no {
+    flex: 1; padding: 10px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    letter-spacing: .04em; cursor: pointer; transition: all .15s ease;
+  }
+  .start-over-yes { background: var(--accent); color: var(--accent-ink); border: none; }
+  .start-over-yes:hover { opacity: .88; }
+  .start-over-no { background: transparent; border: 1px solid var(--line); color: var(--sub); }
+  .start-over-no:hover { border-color: var(--ink); color: var(--ink); }
+
+  .data-tools-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 20px;
+    box-shadow: var(--shadow); transition: border-color .25s ease, background .25s ease;
+  }
+  .data-tools-head-row { display: flex; align-items: center; justify-content: space-between; }
+  .data-tools-head { font-family: 'Anton', sans-serif; font-size: 18px; margin: 0; }
+  .data-tools-body { margin-top: 14px; }
+  .data-tools-body.collapsed { display: none; }
+  #dataToolsToggleIcon { transition: transform .2s ease; }
+  #dataToolsToggleBtn.open #dataToolsToggleIcon { transform: rotate(180deg); }
+  .data-tools-body .backup-card { margin-top: 0; }
+
+  .backup-card { margin-top: 24px; }
+  .backup-hint { font-size: 11.5px; color: var(--sub); margin: 0 0 10px; text-align: center; }
+  .backup-actions { display: flex; gap: 8px; }
+  .backup-btn {
+    flex: 1; display: block; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--sub); font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    letter-spacing: .05em; cursor: pointer; transition: all .15s ease; text-align: center;
+  }
+  .backup-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .backup-status { font-size: 11.5px; margin: 10px 0 0; text-align: center; min-height: 14px; }
+
+  /* ---- App tools: install + reminders + summary ---- */
+  .app-tools-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 20px;
+    box-shadow: var(--shadow); transition: border-color .25s ease, background .25s ease;
+  }
+  .app-tools-head { font-family: 'Anton', sans-serif; font-size: 18px; margin: 0 0 4px; }
+  .app-tools-section { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .app-tools-section:first-of-type { margin-top: 14px; padding-top: 0; border-top: none; }
+  .app-tools-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .app-tools-label { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink); margin: 0; }
+  .app-tools-hint { font-size: 11.5px; color: var(--sub); margin: 4px 0 10px; line-height: 1.5; }
+  .app-tools-status { font-size: 11px; color: var(--sub); margin: 8px 0 0; min-height: 14px; }
+  .app-tools-status.warn { color: var(--accent); }
+
+  .pill-switch {
+    position: relative; width: 42px; height: 24px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--bg); cursor: pointer; flex-shrink: 0; transition: background .2s ease, border-color .2s ease;
+  }
+  .pill-switch .knob {
+    position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--sub); transition: transform .2s ease, background .2s ease;
+  }
+  .pill-switch.on { background: color-mix(in srgb, var(--accent) 22%, var(--bg)); border-color: var(--accent); }
+  .pill-switch.on .knob { background: var(--accent); transform: translateX(18px); }
+
+  .time-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .time-row.hide { display: none; }
+  .time-input {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; flex: 1;
+  }
+  .time-input:focus { outline: none; border-color: var(--accent); }
+
+  .install-btn, .summary-open-btn {
+    width: 100%; display: block; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--sub); font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    letter-spacing: .05em; cursor: pointer; transition: all .15s ease; text-align: center;
+  }
+  .install-btn:hover, .summary-open-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .install-btn.hide { display: none; }
+
+  /* ---- Summary overlay ---- */
+  .summary-overlay {
+    position: fixed; inset: 0; z-index: 900; background: rgba(10,12,15,.6);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility .2s ease;
+  }
+  .summary-overlay.show { opacity: 1; visibility: visible; }
+  .summary-modal {
+    background: var(--card); border-radius: 16px; max-width: 420px; width: 100%; max-height: 88vh;
+    overflow-y: auto; box-shadow: var(--shadow-hover); border: 1px solid var(--line);
+  }
+  .summary-modal-actions { display: flex; gap: 8px; padding: 14px 20px 18px; border-top: 1px solid var(--line); }
+  .summary-modal-actions button {
+    flex: 1; padding: 11px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    letter-spacing: .04em; cursor: pointer; border: 1px solid var(--line); background: transparent; color: var(--sub);
+    transition: all .15s ease;
+  }
+  .summary-modal-actions button:hover { border-color: var(--accent); color: var(--accent); }
+  .summary-modal-actions .primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .summary-modal-actions .primary:hover { opacity: .88; color: var(--accent-ink); }
+  .summary-close-x { position: sticky; top: 10px; float: right; margin: 10px 14px 0 0; background: none; border: none; color: var(--sub); font-size: 18px; cursor: pointer; line-height: 1; }
+
+  #printSummary { padding: 24px 22px 6px; }
+  .ps-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; font-weight: 600; }
+  .ps-title { font-family: 'Anton', sans-serif; font-size: 26px; margin: 0 0 2px; text-transform: uppercase; }
+  .ps-sub { font-size: 12px; color: var(--sub); margin: 0 0 18px; }
+  .ps-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px; }
+  .ps-stat { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; text-align: center; }
+  .ps-stat-num { font-family: 'Anton', sans-serif; font-size: 22px; color: var(--accent); }
+  .ps-stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--sub); margin-top: 2px; }
+  .ps-days { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+  .ps-day { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); font-size: 12.5px; }
+  .ps-day.full { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
+  .ps-day-name { font-family: 'IBM Plex Mono', monospace; font-weight: 600; letter-spacing: .04em; }
+  .ps-day-count { color: var(--sub); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; }
+  .ps-day.full .ps-day-count { color: var(--accent); }
+  .ps-quote { font-size: 12px; font-style: italic; color: var(--sub); border-left: 3px solid var(--accent); padding-left: 12px; margin: 0 0 18px; }
+  .ps-mark { display: flex; align-items: center; gap: 8px; opacity: .75; margin-bottom: 14px; }
+  .ps-mark span { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .08em; color: var(--sub); text-transform: uppercase; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .summary-overlay, .summary-overlay * { visibility: visible; }
+    .summary-overlay { position: absolute; inset: auto; top: 0; left: 0; background: none; padding: 0; display: block; }
+    .summary-modal { max-width: 100%; max-height: none; box-shadow: none; border: none; overflow: visible; }
+    .summary-modal-actions, .summary-close-x { display: none !important; }
+  }
+
+  .front-page {
+    position: fixed; inset: 0; z-index: 500; background: var(--bg);
+    background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--ink) 3%, transparent) 0px, color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px, transparent 14px);
+    display: flex; align-items: center; justify-content: center; padding: 32px 20px;
+    transition: opacity .7s cubic-bezier(.65,0,.35,1), transform .7s cubic-bezier(.65,0,.35,1), filter .6s ease;
+  }
+  .front-page.hide { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.08); filter: blur(10px); }
+  .front-inner { max-width: 460px; width: 100%; }
+  .front-mark { margin-bottom: 18px; }
+  .front-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; font-weight: 600; }
+  .front-title { font-family: 'Anton', sans-serif; font-size: 58px; letter-spacing: .02em; line-height: .94; margin: 0 0 18px; text-transform: uppercase; -webkit-text-stroke: .5px color-mix(in srgb, var(--ink) 40%, transparent); }
+  .front-tagline { font-size: 15px; line-height: 1.55; color: var(--sub); margin: 0 0 20px; max-width: 38ch; }
+  .front-quote { font-size: 14px; font-style: italic; color: var(--ink); margin: 0 0 26px; padding-left: 14px; border-left: 3px solid var(--accent); max-width: 36ch; }
+  .front-week { display: flex; gap: 6px; margin-bottom: 30px; }
+  .front-week span { flex: 1; text-align: center; padding: 9px 2px; border: 1px solid var(--line); border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--sub); text-transform: uppercase; }
+  .front-week span:first-child, .front-week span:last-child { border-color: var(--accent); color: var(--accent); }
+  .front-cta {
+    display: inline-flex; align-items: center; gap: 10px; border: none; border-radius: 8px;
+    background: var(--accent); color: var(--accent-ink); font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 14px 24px; cursor: pointer; transition: opacity .15s ease, transform .15s ease;
+  }
+  .front-cta:hover { opacity: .88; }
+  .front-cta:active { transform: scale(.98); }
+  .front-note { font-size: 12px; color: var(--sub); margin-top: 14px; font-family: 'IBM Plex Mono', monospace; letter-spacing: .02em; }
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="front-page" id="frontPage">
+  <div class="front-inner">
+    <svg class="front-mark" viewBox="0 0 40 40" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="1" y="15" width="6" height="10" rx="1.5" fill="var(--ink)"/>
+      <rect x="33" y="15" width="6" height="10" rx="1.5" fill="var(--ink)"/>
+      <rect x="7" y="11" width="4" height="18" rx="1.5" fill="var(--accent)"/>
+      <rect x="29" y="11" width="4" height="18" rx="1.5" fill="var(--accent)"/>
+      <rect x="11" y="18" width="18" height="4" rx="1" fill="var(--ink)"/>
+    </svg>
+    <p class="front-eyebrow">Mon &mdash; Sun</p>
+    <h2 class="front-title">Project<br>Fitness<br>XXIV</h2>
+    <p class="front-tagline">Your 7-day workout tracker, built your way. Start blank or grab our ready-made routine, then check off every set until it sticks. Let's get after it!</p>
+    <p class="front-quote" id="frontQuote">&#8220;Discipline is choosing between what you want now and what you want most.&#8221;</p>
+    <div class="front-week" aria-hidden="true">
+      <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+    </div>
+    <button class="front-cta" id="startTrainingBtn">Let's Train</button>
+    <p class="front-note">Streaks, levels, and a built-in routine — all set up and ready to go.</p>
+  </div>
+</div>
+
+<div class="wrap" id="appWrap">
+
+  <div class="topbar">
+    <div>
+      <p class="brand-eyebrow">Mon &mdash; Sun</p>
+      <h1>Project<br>Fitness<br>XXIV</h1>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+      <div class="clock-box" id="liveClock">00:00:00</div>
+      <div class="theme-toggle" id="themeToggle">
+        <span id="themeLabel">Dark</span>
+        <span class="dot" id="themeDot">&#9789;</span>
+      </div>
+      <div class="theme-toggle" id="soundToggle">
+        <span id="soundLabel">Sound</span>
+        <span class="dot" id="soundDot">&#128266;</span>
+      </div>
+      <div class="lang-toggle" id="langToggle">
+        <span data-lang="tag" id="langTagBtn">TAG</span><span data-lang="en" id="langEnBtn">EN</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-row">
+    <span class="quote-text" id="quoteText"></span>
+    <button class="shuffle-btn" id="shuffleBtn" aria-label="Palitan ang quote">&#8635;</button>
+  </div>
+
+  <div class="theme-swatches" id="themeSwatches"></div>
+
+  <div class="level-card">
+    <div class="avatar-ring-wrap">
+      <svg class="ring" viewBox="0 0 68 68">
+        <circle class="ring-bg" cx="34" cy="34" r="30"></circle>
+        <circle class="ring-fill" id="ringFill" cx="34" cy="34" r="30"></circle>
+      </svg>
+      <div class="level-avatar" id="avatarBox"></div>
+    </div>
+    <div class="level-info">
+      <div class="level-top">
+        <span class="level-name" id="levelName">LEVEL 1</span>
+        <span class="level-tag" id="levelTag">Rookie</span>
+      </div>
+      <div class="xp-label" id="xpLabel">0 / 40 XP</div>
+      <input class="name-input" id="charName" value="Oliva" maxlength="18">
+    </div>
+    <button class="icon-btn" id="resetLevelBtn" title="Reset level" aria-label="Reset level">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+    </button>
+  </div>
+
+
+  <div class="score">
+    <span id="lblWeekTotal">Week total</span> <b id="weekTotal">0/0</b> &nbsp;&middot;&nbsp; <span id="lblDoneToday">Done today</span> <b id="todayTotal">0/0</b>
+    &nbsp;&middot;&nbsp; <span class="streak-icon" title="Streak">&#128293;</span> <span class="streak-flag" id="streakFlag">0</span>
+  </div>
+
+  <div class="streak-cal-card">
+    <p class="streak-cal-head"><span class="streak-icon">&#128293;</span><span id="streakCalHead">Streak calendar</span><span id="streakCalMonth" style="margin-left:auto;"></span></p>
+    <div class="streak-cal-grid" id="streakCalGrid"></div>
+    <button class="new-week-btn" id="newWeekBtn"></button>
+  </div>
+
+  <div id="weekMotivation"></div>
+  <div id="deloadBanner"></div>
+
+  <div class="strip" id="strip"></div>
+
+  <div class="card">
+    <div class="card-head">
+      <span>
+        <span class="day-title" id="dayTitle"></span>
+        <span class="day-count" id="dayCount"></span>
+        <span class="routine-tags" id="routineTags">
+          <span class="tag-pill tag-default">Default</span>
+          <span class="tag-pill tag-recommended">Recommended</span>
+        </span>
+      </span>
+      <span style="display:flex; align-items:center; gap:6px;">
+        <button class="icon-btn" id="checkAllBtn" title="Check all" aria-label="Check all">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </button>
+        <button class="icon-btn" id="resetDayBtn" title="Reset day" aria-label="Reset day">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+        </button>
+        <button class="inactive-toggle" id="inactiveBtn"></button>
+      </span>
+    </div>
+    <p class="card-note" id="dayNote"></p>
+    <div id="restBanner"></div>
+    <div id="warmupTip"></div>
+    <div id="exList"></div>
+  </div>
+
+  <div class="recap-card">
+    <p class="recap-head" id="recapHead">Weekly recap</p>
+    <div class="recap-grid" id="recapGrid"></div>
+  </div>
+
+  <div class="history-card">
+    <div class="history-head-row">
+      <p class="history-head" id="historyHead">Activity log</p>
+      <span style="display:flex; align-items:center; gap:6px;">
+        <button class="icon-btn" id="resetLogBtn" title="Reset log" aria-label="Reset log">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+            <path d="M6 6v12"/><path d="M18 6v12"/><path d="M4 9v6"/><path d="M20 9v6"/><path d="M6 12h12"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="historyToggleBtn" title="Expand" aria-label="Expand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" id="historyToggleIcon">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </span>
+    </div>
+    <div class="history-list collapsed" id="historyList"></div>
+  </div>
+
+  <div class="data-tools-card">
+    <div class="data-tools-head-row">
+      <p class="data-tools-head" id="dataToolsHead">Data &amp; Reset</p>
+      <button class="icon-btn" id="dataToolsToggleBtn" title="Expand" aria-label="Expand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" id="dataToolsToggleIcon">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div class="data-tools-body collapsed" id="dataToolsBody">
+      <div class="backup-card">
+        <p class="backup-hint" id="backupHint">Save your progress to a file, or restore it on a new device.</p>
+        <div class="backup-actions">
+          <button class="backup-btn" id="exportBtn">Export data</button>
+          <button class="backup-btn" id="importBtn">Import data</button>
+        </div>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
+        <div class="start-over-confirm" id="importConfirm">
+          <p class="start-over-text" id="importConfirmText"></p>
+          <div class="start-over-actions">
+            <button class="start-over-yes" id="importYesBtn"></button>
+            <button class="start-over-no" id="importNoBtn"></button>
+          </div>
+        </div>
+        <p class="backup-status" id="backupStatus"></p>
+      </div>
+
+      <div class="start-over-card">
+        <button class="start-over-btn" id="startOverBtn">Start Over</button>
+        <div class="start-over-confirm" id="startOverConfirm">
+          <p class="start-over-text" id="startOverText">Are you sure you want to start over?</p>
+          <div class="start-over-actions">
+            <button class="start-over-yes" id="startOverYesBtn">Yes, Start Over</button>
+            <button class="start-over-no" id="startOverNoBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-tools-card">
+    <p class="app-tools-head" id="appToolsHead">App &amp; Reminders</p>
+
+    <div class="app-tools-section">
+      <p class="app-tools-hint" id="installHint">Install this as an app on your phone for quick, full-screen access.</p>
+      <button class="install-btn hide" id="installBtn">Add to Home Screen</button>
+      <p class="app-tools-status" id="installStatus"></p>
+    </div>
+
+    <div class="app-tools-section">
+      <div class="app-tools-row">
+        <p class="app-tools-label" id="reminderLabel">Evening check-in reminder</p>
+        <div class="pill-switch" id="reminderSwitch" role="switch" aria-checked="false" tabindex="0"><div class="knob"></div></div>
+      </div>
+      <p class="app-tools-hint" id="reminderHint">Get notified if you haven&#8217;t checked in yet by this time.</p>
+      <div class="time-row hide" id="reminderTimeRow">
+        <input type="time" class="time-input" id="reminderTime" value="19:00">
+      </div>
+      <p class="app-tools-status" id="reminderStatus"></p>
+    </div>
+
+    <div class="app-tools-section">
+      <p class="app-tools-label" id="summaryHead" style="margin-bottom:6px;">Weekly Summary</p>
+      <p class="app-tools-hint" id="summaryHint">A clean recap of your week &mdash; view it, print it, or share it.</p>
+      <button class="summary-open-btn" id="summaryOpenBtn">View Summary</button>
+    </div>
+  </div>
+
+  <div class="footer-mark">
+    <svg viewBox="0 0 40 40" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="1" y="15" width="6" height="10" rx="1.5" fill="var(--sub)"/>
+      <rect x="33" y="15" width="6" height="10" rx="1.5" fill="var(--sub)"/>
+      <rect x="7" y="11" width="4" height="18" rx="1.5" fill="var(--accent)"/>
+      <rect x="29" y="11" width="4" height="18" rx="1.5" fill="var(--accent)"/>
+      <rect x="11" y="18" width="18" height="4" rx="1" fill="var(--sub)"/>
+    </svg>
+  </div>
+  <div class="copyright">Kenneth M Oliva<br>&copy; All rights reserved</div>
+</div>
+
+<div class="summary-overlay" id="summaryOverlay">
+  <div class="summary-modal" id="summaryModal">
+    <button class="summary-close-x" id="summaryCloseX" aria-label="Close">&#10005;</button>
+    <div id="printSummary">
+      <p class="ps-eyebrow">Mon &mdash; Sun</p>
+      <h2 class="ps-title" id="psTitle">Weekly Recap</h2>
+      <p class="ps-sub" id="psSub"></p>
+      <div class="ps-stats" id="psStats"></div>
+      <div class="ps-days" id="psDays"></div>
+      <p class="ps-quote" id="psQuote"></p>
+      <div class="ps-mark">
+        <svg viewBox="0 0 40 40" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1" y="15" width="6" height="10" rx="1.5" fill="var(--sub)"/>
+          <rect x="33" y="15" width="6" height="10" rx="1.5" fill="var(--sub)"/>
+          <rect x="7" y="11" width="4" height="18" rx="1.5" fill="var(--accent)"/>
+          <rect x="29" y="11" width="4" height="18" rx="1.5" fill="var(--accent)"/>
+          <rect x="11" y="18" width="18" height="4" rx="1" fill="var(--sub)"/>
+        </svg>
+        <span>Project Fitness XXIV</span>
+      </div>
+    </div>
+    <div class="summary-modal-actions">
+      <button id="summaryPrintBtn">Print / Save PDF</button>
+      <button class="primary" id="summaryShareBtn">Share</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const RECOMMENDED = {
+  mon:[
+    ['Bodyweight squats','3 x 12',{en:'Keep your knees tracking behind your toes.', tag:'Panatilihing nasa likod ng daliri ng paa ang tuhod.'}],
+    ['Push-ups (knee ok)','3 x 8-10',{en:'Keep your core tight and body in one straight line.', tag:'Panatilihing matigas ang core at tuwid ang katawan.'}],
+    ['Bent-over DB rows','3 x 10',{en:'Squeeze your shoulder blades together at the top.', tag:'Idikit ang shoulder blades sa taas ng bawat galaw.'}],
+    ['Plank','3 x 20s',{en:'Don\u2019t let your hips sag or pike up.', tag:'Huwag hayaang lumubog o tumaas nang sobra ang balakang.'}]
+  ],
+  tue:[
+    ['Brisk walk or jog','25-30 min',{en:'Keep a pace where you can still hold a conversation.', tag:'Panatilihin ang bilis na kaya mo pang makausap ang kasama.'}],
+    ['Jumping jacks','3 x 30s',{en:'Land softly on the balls of your feet.', tag:'Dumapo nang malambot sa ball of the feet.'}],
+    ['Stretching','5 min',{en:'Hold each stretch for 20-30 seconds, no bouncing.', tag:'Hawakan ang bawat stretch ng 20-30 segundo, huwag bumabounce.'}]
+  ],
+  wed:[
+    ['Push-ups','3 x 8-10',{en:'Elbows at about 45\u00b0 to your body, not flared out.', tag:'Nasa 45\u00b0 ang siko, huwag ilabas nang sobra.'}],
+    ['DB shoulder press','3 x 10',{en:'Brace your core so your lower back doesn\u2019t arch.', tag:'Higpitan ang core para hindi paikutin ang lower back.'}],
+    ['Bent-over DB rows','3 x 12',{en:'Hinge forward with a flat back, pull the dumbbells up toward your ribs, squeeze your shoulder blades together.', tag:'Yumuko pasulong na patag ang likod, hilahin ang dumbbells pataas papunta sa tadyang, pisilin ang shoulder blades.'}],
+    ['Bicep curls','3 x 12',{en:'Control the weight on the way down too.', tag:'Kontrolin ang bigat pababa, huwag basta ihulog.'}],
+    ['Tricep dips','3 x 8',{en:'Keep elbows tucked close to your body.', tag:'Panatilihing malapit sa katawan ang mga siko.'}]
+  ],
+  thu:[
+    ['Light stretching','10 min',{en:'Breathe slow and deep through every stretch.', tag:'Huminga nang mabagal at malalim sa bawat stretch.'}],
+    ['Easy walk','15-20 min',{en:'Keep the effort light \u2014 this is rest, not training.', tag:'Panatilihing magaan \u2014 pahinga ito, hindi training.'}]
+  ],
+  fri:[
+    ['Lunges','3 x 10/leg',{en:'Front knee stays stacked above the ankle.', tag:'Ang harap na tuhod ay nasa ibabaw ng bukong-bukong.'}],
+    ['Squats','3 x 12',{en:'Drive through your heels as you stand up.', tag:'Idiin ang lakas sa sakong paakyat.'}],
+    ['Glute bridges','3 x 15',{en:'Squeeze your glutes hard at the top.', tag:'Higpitan nang husto ang glutes sa taas ng galaw.'}],
+    ['Calf raises','3 x 15',{en:'Pause at the top for a full contraction.', tag:'Huminto sandali sa taas para sa buong contraction.'}]
+  ],
+  sat:[
+    ['Plank','3 x 20-30s',{en:'Keep your neck neutral, eyes toward the floor.', tag:'Panatilihing neutral ang leeg, tumingin sa sahig.'}],
+    ['Bicycle crunches','3 x 15',{en:'Move slow and controlled, not fast and sloppy.', tag:'Dahan-dahan at kontrolado, huwag mabilis at basta-basta.'}],
+    ['Mountain climbers','3 x 20s',{en:'Keep your hips low and steady the whole time.', tag:'Panatilihing mababa at matatag ang balakang.'}],
+    ['Jump rope / jog','10 min',{en:'Land light on your feet, small quick hops.', tag:'Dumapo nang magaan sa paa, maliit at mabilis na hops.'}]
+  ],
+  sun:[
+    ['Full rest','\u2014',{en:'Recovery is part of the program too.', tag:'Bahagi rin ng program ang pahinga.'}]
+  ],
+};
+
+const days = [
+  { key:'mon', label:'MON', title:{en:'Full body', tag:'Buong Katawan'}, note:{en:'Foundation strength, all major muscle groups.', tag:'Pundasyon ng lakas, lahat ng major muscle groups.'}, ex:[] },
+  { key:'tue', label:'TUE', title:{en:'Cardio', tag:'Cardio'}, note:{en:'Get the heart rate up, keep it light on the joints.', tag:'Paangatin ang heart rate, panatilihing magaan sa joints.'}, ex:[] },
+  { key:'wed', label:'WED', title:{en:'Upper body', tag:'Itaas ng Katawan'}, note:{en:'Chest, shoulders, arms.', tag:'Dibdib, balikat, braso.'}, ex:[] },
+  { key:'thu', label:'THU', title:{en:'Recovery', tag:'Recovery'}, note:{en:'Active rest \u2014 let the muscles repair.', tag:'Active rest \u2014 hayaang gumaling ang mga muscles.'}, ex:[] },
+  { key:'fri', label:'FRI', title:{en:'Lower body', tag:'Ibaba ng Katawan'}, note:{en:'Legs and glutes.', tag:'Binti at glutes.'}, ex:[] },
+  { key:'sat', label:'SAT', title:{en:'Core + cardio', tag:'Core + Cardio'}, note:{en:'Finish the week strong.', tag:'Tapusin nang malakas ang linggo.'}, ex:[] },
+  { key:'sun', label:'SUN', title:{en:'Rest', tag:'Pahinga'}, note:{en:'Full rest, or a gentle walk if you feel like moving.', tag:'Buong pahinga, o magaan na lakad kung gusto mong gumalaw.'}, ex:[] },
+];
+
+const SUGGESTIONS = {
+  mon: [
+    ['Goblet squats','3 x 10',{en:'Hold a dumbbell close to your chest, feet shoulder-width apart. Squat down keeping your chest up and knees out, then push through your heels to stand.', tag:'Hawakan ang dumbbell malapit sa dibdib, hiwalay ang paa sa lapad ng balikat. Yumuko pababa habang nakataas ang dibdib at nakabuka ang tuhod, itulak sa sakong pataas.'}],
+    ['Incline push-ups','3 x 10',{en:'Place hands on a bench or step, body in a straight line. Lower your chest to the surface, then push back up.', tag:'Ilagay ang kamay sa bench o hagdan, tuwid ang katawan. Ibaba ang dibdib papalapit sa ibabaw, itulak pabalik pataas.'}],
+    ['Superman hold','3 x 20s',{en:'Lie face down, lift arms and legs off the floor at the same time, hold, then lower slowly.', tag:'Humiga nakadapa, itaas ang braso at binti sabay, hawakan, ibaba nang dahan-dahan.'}],
+    ['Dead bug','3 x 10/side',{en:'Lie on your back, arms up and knees bent 90\u00b0. Lower one arm and the opposite leg toward the floor, keeping your low back flat, then return.', tag:'Humiga nakatihaya, nakataas ang braso at nakatiklop ang tuhod sa 90\u00b0. Ibaba ang isang braso at kabaligtarang binti papalapit sa sahig, panatilihing patag ang lower back, bumalik.'}],
+  ],
+  tue: [
+    ['Jump rope','10 min',{en:'Small quick hops on the balls of your feet, wrists doing most of the turning, not the arms.', tag:'Maliit at mabilis na hops sa ball of the feet, ang pulso ang gumagalaw, hindi ang buong braso.'}],
+    ['High knees','3 x 30s',{en:'Run in place, driving your knees up toward waist height as fast as you can with good posture.', tag:'Tumakbo sa iisang lugar, itaas ang tuhod hanggang baywang habang mabilis pero maayos ang postura.'}],
+    ['Burpees','3 x 8',{en:'Squat down, kick your feet back to a plank, do a push-up, jump feet back in, then jump up.', tag:'Yumuko, itapon ang paa pabalik sa plank, gumawa ng push-up, ibalik ang paa, tumalon pataas.'}],
+    ['Cycling','20 min',{en:'Keep a steady, moderate pace where your breathing is elevated but controlled.', tag:'Panatilihin ang steady at katamtamang bilis, mabilis ang paghinga pero kontrolado pa rin.'}],
+  ],
+  wed: [
+    ['Diamond push-ups','3 x 8',{en:'Form a diamond shape with your thumbs and index fingers under your chest, then lower and push up.', tag:'Gumawa ng hugis-diamante gamit ang thumbs at index fingers sa ilalim ng dibdib, ibaba at itulak pataas.'}],
+    ['Lateral raises','3 x 12',{en:'Hold light dumbbells at your sides, raise arms out to shoulder height with a slight elbow bend, lower slowly.', tag:'Hawakan ang magaan na dumbbells sa gilid, itaas ang braso hanggang balikat na taas, ibaba nang dahan-dahan.'}],
+    ['Bent-over rows (DB)','3 x 12',{en:'Hinge forward at the hips with a flat back, pull the dumbbells up toward your ribs squeezing your shoulder blades, then lower with control.', tag:'Yumuko pasulong sa balakang na patag ang likod, hilahin ang dumbbells pataas papunta sa tadyang habang pinipisil ang shoulder blades, ibaba nang dahan-dahan.'}],
+    ['Hammer curls','3 x 12',{en:'Hold dumbbells with palms facing each other, curl up without twisting your wrist, lower with control.', tag:'Hawakan ang dumbbells na magkaharap ang palad, i-curl pataas nang hindi pinipilipit ang pulso, ibaba nang dahan-dahan.'}],
+    ['Pike push-ups','3 x 8',{en:'Hips high in an inverted-V, lower your head toward the floor between your hands, then push back up.', tag:'Nakataas ang balakang sa hugis inverted-V, ibaba ang ulo papalapit sa sahig sa pagitan ng kamay, itulak pabalik.'}],
+  ],
+  thu: [
+    ['Foam rolling','10 min',{en:'Roll slowly over tight muscles, pausing on tender spots for 20-30 seconds.', tag:'Dahan-dahang i-roll sa mga masakit na muscle, huminto sa mahapdi na parte ng 20-30 segundo.'}],
+    ['Cat-cow stretch','2 x 10',{en:'On hands and knees, arch your back up (cat) then dip it down (cow), moving with your breath.', tag:'Nakaupo sa apat na paa, pababa/pataas ang likod (cat/cow), sabay sa paghinga.'}],
+    ['Child\u2019s pose','1 x 60s',{en:'Kneel and sit back on your heels, reach arms forward on the floor, and relax your back.', tag:'Lumuhod at umupo sa sakong, iunat ang braso pasulong sa sahig, relaks ang likod.'}],
+    ['Deep breathing','5 min',{en:'Inhale slowly through your nose for 4 counts, hold, then exhale for 6 counts.', tag:'Huminga nang mabagal sa ilong ng 4 na bilang, hawakan, hingal ng 6 na bilang.'}],
+  ],
+  fri: [
+    ['Romanian deadlift (DB)','3 x 10',{en:'Hinge at your hips with a slight knee bend, lower the dumbbells along your legs, then drive hips forward to stand.', tag:'Yumuko sa balakang na may kaunting baluktot sa tuhod, ibaba ang dumbbells sa gilid ng binti, itulak ang balakang pasulong para tumayo.'}],
+    ['Step-ups','3 x 10/leg',{en:'Step fully onto a bench or box, drive through the lead heel to stand tall, then step down with control.', tag:'Umakyat nang buo sa bench o box, idiin ang sakong para tumayo nang tuwid, bumaba nang dahan-dahan.'}],
+    ['Wall sit','3 x 30s',{en:'Back flat against a wall, slide down until thighs are parallel to the floor, hold that position.', tag:'Patag ang likod sa dingding, dumausdos pababa hanggang parallel sa sahig ang hita, hawakan ang posisyon.'}],
+    ['Hip thrusts','3 x 12',{en:'Upper back on a bench, feet flat, drive your hips up until your body forms a straight line, squeeze at the top.', tag:'Nasa bench ang upper back, patag ang paa, itulak ang balakang pataas hanggang tuwid ang katawan, higpitan sa taas.'}],
+  ],
+  sat: [
+    ['Russian twists','3 x 20',{en:'Sit with knees bent, lean back slightly, and rotate your torso side to side with control.', tag:'Umupo nang nakatiklop ang tuhod, sumandal nang kaunti, ikot ang katawan sa magkabilang gilid nang kontrolado.'}],
+    ['Leg raises','3 x 12',{en:'Lie on your back, legs straight, raise them to 90\u00b0 keeping your low back pressed to the floor, lower slowly.', tag:'Humiga, tuwid ang binti, itaas hanggang 90\u00b0 habang nakadikit sa sahig ang lower back, ibaba nang dahan-dahan.'}],
+    ['Burpees','3 x 10',{en:'Squat down, kick your feet back to a plank, do a push-up, jump feet back in, then jump up.', tag:'Yumuko, itapon ang paa pabalik sa plank, gumawa ng push-up, ibalik ang paa, tumalon pataas.'}],
+    ['Side plank','3 x 20s/side',{en:'Prop up on one forearm, body in a straight line, hips lifted off the floor, hold.', tag:'Sumandal sa isang forearm, tuwid ang katawan, nakataas ang balakang sa sahig, hawakan.'}],
+  ],
+  sun: [
+    ['Gentle yoga flow','15 min',{en:'Move slowly between simple poses, syncing each movement with a breath in or out.', tag:'Dahan-dahang lumipat sa simpleng poses, isabay ang bawat galaw sa paghinga.'}],
+    ['Nature walk','20 min',{en:'Walk at an easy, relaxed pace \u2014 no need to push the effort today.', tag:'Maglakad nang magaan at relaks \u2014 walang pangangailangang pagurin ang sarili ngayon.'}],
+    ['Deep breathing','5 min',{en:'Inhale slowly through your nose for 4 counts, hold, then exhale for 6 counts.', tag:'Huminga nang mabagal sa ilong ng 4 na bilang, hawakan, hingal ng 6 na bilang.'}],
+  ],
+};
+
+const STR = {
+  lblWeekTotal:{en:'This week', tag:'Ngayong linggo'},
+  lblDoneToday:{en:'Done today', tag:'Tapos ngayon'},
+  recapHead:{en:'Your Weekly Recap', tag:'Lingguhang Recap Mo'},
+  historyHead:{en:'Activity Log', tag:'Listahan ng Aktibidad'},
+  dataToolsHead:{en:'Data & Reset', tag:'Data at Reset'},
+  markRest:{en:'Take the Day Off', tag:'I-rest Day Muna'},
+  makeActive:{en:'Let\u2019s Go', tag:'Game Na'},
+  restBanner:{en:'Chill day \u2014 this one won\u2019t count toward your progress. Tap "Let\u2019s Go" whenever you\u2019re ready to train.', tag:'Rest day muna \u2014 hindi ito bibilangin sa progress. I-tap ang "Game Na" kapag ready ka nang mag-train.'},
+  namePh:{en:'Exercise name', tag:'Pangalan ng exercise'},
+  repsPh:{en:'Reps', tag:'Reps'},
+  notePh:{en:'Note (optional)', tag:'Note (optional)'},
+  errName:{en:'Give it a name first, bro!', tag:'Lagyan mo muna ng pangalan, bro!'},
+  addRow:{en:'Add an exercise', tag:'Magdagdag ng exercise'},
+  suggestLabel:{en:'Need ideas? Try one of these:', tag:'Kailangan ng idea? Subukan ito:'},
+  checked:{en:'Checked off: ', tag:'Chinek: '},
+  unchecked:{en:'Unchecked: ', tag:'Ni-uncheck: '},
+  historyEmpty:{en:'Nothing here yet \u2014 check off an exercise to get the ball rolling!', tag:'Wala pang laman \u2014 mag-check ng exercise para magsimula!'},
+  resetLog:{en:'Clear log', tag:'I-clear ang log'},
+  resetDay:{en:'Reset day', tag:'I-reset ang araw'},
+  resetDayLog:{en:'Reset progress: ', tag:'Na-reset ang progress: '},
+  checkAll:{en:'Check everything', tag:'I-check lahat'},
+  uncheckAll:{en:'Uncheck everything', tag:'Alisin lahat'},
+  checkedAllLog:{en:'Checked off every exercise', tag:'Na-check lahat ng exercises'},
+  uncheckedAllLog:{en:'Unchecked every exercise', tag:'Na-uncheck lahat ng exercises'},
+  howTo:{en:'How to do it', tag:'Paano gawin'},
+  warmupText:{en:'Warm up first \u2014 5 min light cardio (jog in place, jumping jacks) + dynamic stretches (arm circles, leg swings, bodyweight squats).', tag:'Mag-warm-up muna \u2014 5 min magaan na cardio (jog sa lugar, jumping jacks) + dynamic stretches (arm circles, leg swings, bodyweight squats).'},
+  logPh:{en:'Log weight/reps used (optional)', tag:'I-log ang bigat/reps na ginamit (optional)'},
+  logLast:{en:'Last: ', tag:'Huli: '},
+  deloadLabel:{en:'Deload week suggested', tag:'Mungkahi: Deload Week'},
+  deloadText:{en:'You\u2019ve finished 4 full weeks. Consider a lighter week \u2014 cut reps/sets by about half or drop the weight, so your body can recover before pushing harder again.', tag:'Apat nang buong linggo ang natapos mo. Subukan ang mas magaan na linggo \u2014 bawasan ng kalahati ang reps/sets o ang bigat, para makapag-recover ang katawan bago ka mag-push ulit nang mas malakas.'},
+  backupHint:{en:'Save your progress to a file, or restore it on a new device.', tag:'I-save ang progress mo sa isang file, o i-restore ito sa bagong device.'},
+  exportBtn:{en:'Export data', tag:'I-export ang data'},
+  importBtn:{en:'Import data', tag:'I-import ang data'},
+  exportedOk:{en:'Downloaded! Keep this file somewhere safe.', tag:'Na-download! I-save sa ligtas na lugar.'},
+  importedOk:{en:'Data restored successfully.', tag:'Matagumpay na na-restore ang data.'},
+  importedErr:{en:'That file doesn\u2019t look right \u2014 try a different export file.', tag:'Mukhang mali ang file na iyan \u2014 subukan ang ibang export file.'},
+  importConfirm:{en:'This will replace your current progress with the data in this file. Continue?', tag:'Papalitan nito ang kasalukuyang progress mo ng laman ng file na ito. Magpatuloy?'},
+  importConfirmYes:{en:'Yes, Import', tag:'Oo, I-import'},
+  importConfirmNo:{en:'Cancel', tag:'Kanselahin'},
+  streakCalHead:{en:'Streak Calendar', tag:'Kalendaryo ng Streak'},
+  onFire:{en:' (you\u2019re on fire!)', tag:' (sunog na sunog!)'},
+  daysDone:{en:'Days crushed', tag:'Araw na natapos'},
+  exChecked:{en:'Exercises checked', tag:'Exercises na na-check'},
+  totalXp:{en:'Total XP', tag:'Kabuuang XP'},
+  curLevel:{en:'Current level', tag:'Kasalukuyang level'},
+  newWeekLog:{en:'Fresh week, same you \u2014 your level carries over!', tag:'Bagong linggo, same ka pa rin \u2014 dala-dala pa rin ang level mo!'},
+  weekMotivationLabel:{en:'Full week streak', tag:'Full week streak'},
+  newWeekBtn:{en:'Finish week \u2014 start fresh', tag:'Tapos na ang linggo \u2014 Bagong simula'},
+  resetLevel:{en:'Reset level', tag:'I-reset ang level'},
+  resetLevelConfirm:{en:'Tap again to confirm \u2014 no take-backs!', tag:'Pindutin ulit para kumpirmahin \u2014 wala nang atras!'},
+  resetLevelLog:{en:'Level, XP, streak, badges, and checked exercises reset', tag:'Na-reset ang level, XP, streak, badges, at mga na-check na exercise'},
+  startOverBtn:{en:'Start Over', tag:'Magsimula Ulit'},
+  startOverText:{en:'Sure you want to start over, bro? This wipes your level, XP, streak, badges, checked exercises, and activity log.', tag:'Sigurado ka bang gusto mong magsimula ulit, bro? Mare-reset nito ang level, XP, streak, badges, na-check na exercise, at activity log mo.'},
+  startOverYes:{en:'Yes, Start Over', tag:'Oo, Simulan Ulit'},
+  startOverNo:{en:'Cancel', tag:'Kanselahin'},
+  appToolsHead:{en:'App & Reminders', tag:'App at Paalala'},
+  installHint:{en:'Install this as an app on your phone for quick, full-screen access.', tag:'I-install ito bilang app sa phone mo para mabilis at full-screen ang access.'},
+  installBtn:{en:'Add to Home Screen', tag:'Idagdag sa Home Screen'},
+  installedOk:{en:'Installed! Look for it on your home screen.', tag:'Na-install na! Hanapin sa home screen mo.'},
+  installedAlready:{en:'Already installed on this device.', tag:'Naka-install na sa device na ito.'},
+  installUnavailable:{en:'Open this page in Chrome/Edge on Android, or use Safari\u2019s Share \u2192 Add to Home Screen on iPhone.', tag:'Buksan ang page na ito sa Chrome/Edge sa Android, o gamitin ang Share \u2192 Add to Home Screen sa Safari kung iPhone.'},
+  reminderLabel:{en:'Evening check-in reminder', tag:'Paalala sa gabi para sa check-in'},
+  reminderHint:{en:'Get notified if you haven\u2019t checked in yet by this time.', tag:'Ma-notify ka kapag hindi ka pa nakaka-check-in bago sumapit ang oras na ito.'},
+  reminderOn:{en:'On', tag:'Naka-ON'},
+  reminderOff:{en:'Off', tag:'Naka-OFF'},
+  reminderPermNeeded:{en:'Notifications are blocked \u2014 enable them in your browser settings.', tag:'Naka-block ang notifications \u2014 i-enable sa settings ng browser mo.'},
+  reminderSet:{en:'You\u2019ll get a reminder at ', tag:'May paalala ka bukas ng '},
+  summaryHead:{en:'Weekly Summary', tag:'Lingguhang Summary'},
+  summaryHint:{en:'A clean recap of your week \u2014 view it, print it, or share it.', tag:'Malinis na buod ng linggo mo \u2014 tingnan, i-print, o i-share.'},
+  summaryBtn:{en:'View Summary', tag:'Tingnan ang Summary'},
+  summaryTitle:{en:'Weekly Recap', tag:'Lingguhang Recap'},
+  summaryPrint:{en:'Print / Save PDF', tag:'I-print / I-save bilang PDF'},
+  summaryShare:{en:'Share', tag:'I-share'},
+  summaryClose:{en:'Close', tag:'Isara'},
+  summaryDone:{en:'done', tag:'tapos'},
+  summaryRest:{en:'rest day', tag:'rest day'},
+  summarySharing:{en:'Preparing image\u2026', tag:'Inihahanda ang larawan\u2026'},
+  summarySharedOk:{en:'Ready \u2014 check your share sheet.', tag:'Handa na \u2014 tingnan ang share sheet.'},
+  summaryShareErr:{en:'Couldn\u2019t share directly \u2014 image downloaded instead.', tag:'Hindi na-share nang diretso \u2014 na-download na lang ang larawan.'},
+};
+function t(key){ return STR[key][lang]; }
+function noteText(e){ const n = e[2]; if(!n) return ''; return typeof n === 'string' ? n : (n[lang] || n.en || n.tag || ''); }
+
+const DAY_ABBR = {
+  en: ['MON','TUE','WED','THU','FRI','SAT','SUN'],
+  tag: ['LUN','MAR','MIY','HUW','BIY','SAB','LIN'],
+};
+
+const MONTH_NAMES = {
+  en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  tag: ['Enero','Pebrero','Marso','Abril','Mayo','Hunyo','Hulyo','Agosto','Setyembre','Oktubre','Nobyembre','Disyembre'],
+};
+
+const QUOTES = {
+  tag: [
+    'Isang check-off ngayon, isang hakbang papalapit sa goal mo.',
+    'Hindi kailangan perpekto, kailangan lang tuloy-tuloy.',
+    'Ang bawat rep ay bahagi ng bagong ikaw.',
+    'Consistency beats intensity.',
+    'Simula sa payat, tapos sa malakas \u2014 ikaw ang gumagawa nito.',
+    'Small progress is still progress.',
+    'Isang araw, isang set, isang bagong level.',
+  ],
+  en: [
+    'One check-off today is one step closer to your goal.',
+    'It doesn\u2019t have to be perfect, it just has to be consistent.',
+    'Every rep is part of the new you.',
+    'Consistency beats intensity.',
+    'Start light, finish strong \u2014 you\u2019re the one making it happen.',
+    'Small progress is still progress.',
+    'One day, one set, one new level.',
+  ],
+};
+
+const GYM_MOTIVATION = {
+  tag: [
+    'Isang buong linggo, tapos! Ang katawan mo ngayon ay resulta ng ginawa mo kahapon \u2014 ituloy mo lang.',
+    'Buong linggo kang dumayo sa gym o nag-train sa bahay. Yan ang tunay na disiplina, hindi motivation lang.',
+    'Isa ka nang linggo na mas malakas kaysa noon. Huwag mo nang bitawan ang ganyang klaseng puso.',
+    'Full week streak! Ang bawat rep na ginawa mo ay bricks papuntang mas malakas at mas healthy na bersyon mo.',
+    'Tapos na naman ang isang linggo ng pagsisikap. Ipagpatuloy mo \u2014 hindi ito tungkol sa perpekto, kundi sa consistent.',
+    'Ikaw mismo ang nagpatunay: kaya mo palang magtuloy-tuloy. Isa pang linggo, isa pang level up.',
+  ],
+  en: [
+    'A full week, done! Your body today is a result of what you did yesterday \u2014 keep it going.',
+    'A whole week of showing up, whether at the gym or at home. That\u2019s real discipline, not just motivation.',
+    'You\u2019re a week stronger than before. Don\u2019t let go of that kind of heart.',
+    'Full week streak! Every rep you logged is a brick toward a stronger, healthier you.',
+    'Another week of effort in the books. Keep going \u2014 it\u2019s not about perfect, it\u2019s about consistent.',
+    'You just proved it to yourself: you can keep showing up. One more week, one more level up.',
+  ],
+};
+
+let progress = {};
+let active = 'mon';
+let editing = null;
+let addOpen = {};
+let lang = 'en';
+let openTutorial = null;
+let dayActive = {};
+days.forEach(d => dayActive[d.key] = true);
+let dayMode = {};
+days.forEach(d => dayMode[d.key] = 'default');
+let lastLevel = null;
+let historyLog = [];
+let accentTheme = 'red';
+let lifetimeChecks = 0;
+let weekStartKey = null;
+let unlockedAchievements = {};
+let weeksCompletedCount = 0;
+let weekFullCelebrated = false;
+let persistentStreakBase = 0;
+let xpResetOffset = 0;
+let soundEnabled = true;
+let exerciseLogs = {};
+let reminderEnabled = false;
+let reminderTime = '19:00';
+let reminderShownDate = null;
+
+const STORAGE_KEY = 'kensuuke-gym-planner-v1';
+
+function saveState(){
+  try{
+    const state = {
+      progress: progress,
+      active: active,
+      dayActive: dayActive,
+      dayMode: dayMode,
+      lang: lang,
+      historyLog: historyLog,
+      accentTheme: accentTheme,
+      theme: document.body.getAttribute('data-theme'),
+      charName: document.getElementById('charName').value,
+      lastLevel: lastLevel,
+      lifetimeChecks: lifetimeChecks,
+      weekStartKey: weekStartKey,
+      unlockedAchievements: unlockedAchievements,
+      weeksCompletedCount: weeksCompletedCount,
+      weekFullCelebrated: weekFullCelebrated,
+      persistentStreakBase: persistentStreakBase,
+      xpResetOffset: xpResetOffset,
+      soundEnabled: soundEnabled,
+      exerciseLogs: exerciseLogs,
+      reminderEnabled: reminderEnabled,
+      reminderTime: reminderTime,
+      reminderShownDate: reminderShownDate,
+      days: days.map(d => ({ key: d.key, ex: d.ex })),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ /* storage unavailable, fail silently */ }
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(s.progress) progress = s.progress;
+    if(s.active) active = s.active;
+    if(s.dayActive) dayActive = s.dayActive;
+    if(s.dayMode) dayMode = s.dayMode;
+    if(s.lang) lang = s.lang;
+    if(s.historyLog) historyLog = s.historyLog;
+    if(s.accentTheme) accentTheme = s.accentTheme;
+    if(typeof s.lastLevel === 'number') lastLevel = s.lastLevel;
+    if(typeof s.lifetimeChecks === 'number') lifetimeChecks = s.lifetimeChecks;
+    if(typeof s.weekStartKey === 'string') weekStartKey = s.weekStartKey;
+    if(s.unlockedAchievements) unlockedAchievements = s.unlockedAchievements;
+    if(typeof s.weeksCompletedCount === 'number') weeksCompletedCount = s.weeksCompletedCount;
+    if(typeof s.weekFullCelebrated === 'boolean') weekFullCelebrated = s.weekFullCelebrated;
+    if(typeof s.persistentStreakBase === 'number') persistentStreakBase = s.persistentStreakBase;
+    if(typeof s.xpResetOffset === 'number') xpResetOffset = s.xpResetOffset;
+    if(typeof s.soundEnabled === 'boolean') soundEnabled = s.soundEnabled;
+    if(s.exerciseLogs) exerciseLogs = s.exerciseLogs;
+    if(typeof s.reminderEnabled === 'boolean') reminderEnabled = s.reminderEnabled;
+    if(typeof s.reminderTime === 'string') reminderTime = s.reminderTime;
+    if(typeof s.reminderShownDate === 'string') reminderShownDate = s.reminderShownDate;
+    if(s.theme) document.body.setAttribute('data-theme', s.theme);
+    if(s.charName) document.getElementById('charName').value = s.charName;
+    if(Array.isArray(s.days)){
+      s.days.forEach(saved=>{
+        const d = days.find(x=>x.key===saved.key);
+        if(d && Array.isArray(saved.ex)) d.ex = saved.ex;
+      });
+    }
+  }catch(e){ /* corrupted or unavailable storage, start fresh */ }
+}
+
+function buildStateSnapshot(){
+  return {
+    progress: progress, active: active, dayActive: dayActive, dayMode: dayMode, lang: lang,
+    historyLog: historyLog, accentTheme: accentTheme,
+    theme: document.body.getAttribute('data-theme'),
+    charName: document.getElementById('charName').value,
+    lastLevel: lastLevel, lifetimeChecks: lifetimeChecks, weekStartKey: weekStartKey,
+    unlockedAchievements: unlockedAchievements, weeksCompletedCount: weeksCompletedCount,
+    weekFullCelebrated: weekFullCelebrated, persistentStreakBase: persistentStreakBase,
+    xpResetOffset: xpResetOffset, soundEnabled: soundEnabled, exerciseLogs: exerciseLogs,
+    days: days.map(d => ({ key: d.key, ex: d.ex })),
+    exportedAt: new Date().toISOString(),
+  };
+}
+
+function exportData(){
+  const snapshot = buildStateSnapshot();
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'gym-planner-backup-' + dateStr + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showBackupStatus(t('exportedOk'), false);
+}
+
+function applyImportedState(s){
+  if(!s || typeof s !== 'object') throw new Error('bad file');
+  if(s.progress) progress = s.progress;
+  if(s.active) active = s.active;
+  if(s.dayActive) dayActive = s.dayActive;
+  if(s.dayMode) dayMode = s.dayMode;
+  if(s.lang) lang = s.lang;
+  if(s.historyLog) historyLog = s.historyLog;
+  if(s.accentTheme) accentTheme = s.accentTheme;
+  if(typeof s.lastLevel === 'number') lastLevel = s.lastLevel;
+  if(typeof s.lifetimeChecks === 'number') lifetimeChecks = s.lifetimeChecks;
+  if(typeof s.weekStartKey === 'string') weekStartKey = s.weekStartKey;
+  if(s.unlockedAchievements) unlockedAchievements = s.unlockedAchievements;
+  if(typeof s.weeksCompletedCount === 'number') weeksCompletedCount = s.weeksCompletedCount;
+  if(typeof s.weekFullCelebrated === 'boolean') weekFullCelebrated = s.weekFullCelebrated;
+  if(typeof s.persistentStreakBase === 'number') persistentStreakBase = s.persistentStreakBase;
+  if(typeof s.xpResetOffset === 'number') xpResetOffset = s.xpResetOffset;
+  if(typeof s.soundEnabled === 'boolean') soundEnabled = s.soundEnabled;
+  if(s.exerciseLogs) exerciseLogs = s.exerciseLogs;
+  if(s.theme) document.body.setAttribute('data-theme', s.theme);
+  if(s.charName) document.getElementById('charName').value = s.charName;
+  if(Array.isArray(s.days)){
+    s.days.forEach(saved=>{
+      const d = days.find(x=>x.key===saved.key);
+      if(d && Array.isArray(saved.ex)) d.ex = saved.ex;
+    });
+  }
+  saveState();
+  setTheme(document.body.getAttribute('data-theme')==='dark');
+  setSound(soundEnabled);
+  render();
+}
+
+function importDataFromFile(file){
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const s = JSON.parse(e.target.result);
+      applyImportedState(s);
+      showBackupStatus(t('importedOk'), false);
+    }catch(err){
+      showBackupStatus(t('importedErr'), true);
+    }
+  };
+  reader.onerror = ()=> showBackupStatus(t('importedErr'), true);
+  reader.readAsText(file);
+}
+
+function showBackupStatus(msg, isError){
+  const el = document.getElementById('backupStatus');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? 'var(--accent)' : 'var(--sub)';
+}
+
+const ACCENTS = {
+  orange: { light:'#FF5A1F', dark:'#FF7A45' },
+  red:    { light:'#E63946', dark:'#FF6B6B' },
+  blue:   { light:'#1D7FE0', dark:'#5AA9F5' },
+  green:  { light:'#1FA24A', dark:'#4CD07A' },
+};
+
+function applyAccent(){
+  const mode = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  document.body.style.setProperty('--accent', ACCENTS[accentTheme][mode]);
+  document.querySelectorAll('.swatch').forEach(s=>{
+    s.classList.toggle('active', s.getAttribute('data-theme-name') === accentTheme);
+  });
+}
+
+function renderSwatches(){
+  const box = document.getElementById('themeSwatches');
+  const mode = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  box.innerHTML = Object.keys(ACCENTS).map(name=>{
+    return '<div class="swatch" data-theme-name="' + name + '" style="background:' + ACCENTS[name][mode] + '"></div>';
+  }).join('');
+  box.querySelectorAll('.swatch').forEach(s=>{
+    s.onclick = ()=>{ accentTheme = s.getAttribute('data-theme-name'); applyAccent(); };
+  });
+  applyAccent();
+}
+
+function renderQuote(){
+  const list = QUOTES[lang];
+  document.getElementById('quoteText').textContent = list[Math.floor(Math.random()*list.length)];
+}
+document.getElementById('shuffleBtn').onclick = renderQuote;
+
+function updateClock(){
+  const now = new Date();
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+setInterval(updateClock, 1000);
+
+function renderStreakCalendar(){
+  document.getElementById('streakCalHead').textContent = t('streakCalHead');
+  const now = new Date();
+  document.getElementById('streakCalMonth').textContent = MONTH_NAMES[lang][now.getMonth()] + ' ' + now.getFullYear();
+  const dow = now.getDay();
+  const diffToMonday = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMonday);
+  monday.setHours(0,0,0,0);
+
+  const abbr = DAY_ABBR[lang];
+  const html = days.map((d,i)=>{
+    const cellDate = new Date(monday);
+    cellDate.setDate(monday.getDate() + i);
+    const isToday = cellDate.toDateString() === now.toDateString();
+    const isOff = !dayActive[d.key];
+    const hit = !isOff && d.ex.length > 0 && doneCount(d) === d.ex.length;
+    const cls = 'streak-cal-cell' + (isToday ? ' today' : '') + (isOff ? ' off' : '') + (hit ? ' hit' : '');
+    return '<div class="' + cls + '"><span class="streak-cal-day">' + abbr[i] + '</span>' +
+      '<span class="streak-cal-date">' + cellDate.getDate() + '</span>' +
+      '<span class="streak-cal-flame">&#128293;</span></div>';
+  }).join('');
+  document.getElementById('streakCalGrid').innerHTML = html;
+  const newWeekBtn = document.getElementById('newWeekBtn');
+  newWeekBtn.textContent = t('newWeekBtn');
+  newWeekBtn.onclick = startNewWeek;
+}
+
+function setLang(l){
+  lang = l;
+  document.getElementById('langTagBtn').classList.toggle('on', lang==='tag');
+  document.getElementById('langEnBtn').classList.toggle('on', lang==='en');
+  renderQuote();
+  render();
+}
+document.getElementById('langTagBtn').onclick = ()=> setLang('tag');
+document.getElementById('langEnBtn').onclick = ()=> setLang('en');
+
+function clearHistory(){
+  historyLog = [];
+  render();
+}
+document.getElementById('resetLogBtn').onclick = clearHistory;
+document.getElementById('historyToggleBtn').onclick = ()=>{
+  const list = document.getElementById('historyList');
+  const btn = document.getElementById('historyToggleBtn');
+  const isOpen = !list.classList.contains('collapsed');
+  list.classList.toggle('collapsed', isOpen);
+  btn.classList.toggle('open', !isOpen);
+  btn.title = isOpen ? 'Expand' : 'Collapse';
+  btn.setAttribute('aria-label', isOpen ? 'Expand' : 'Collapse');
+};
+document.getElementById('dataToolsToggleBtn').onclick = ()=>{
+  const body = document.getElementById('dataToolsBody');
+  const btn = document.getElementById('dataToolsToggleBtn');
+  const isOpen = !body.classList.contains('collapsed');
+  body.classList.toggle('collapsed', isOpen);
+  btn.classList.toggle('open', !isOpen);
+  btn.title = isOpen ? 'Expand' : 'Collapse';
+  btn.setAttribute('aria-label', isOpen ? 'Expand' : 'Collapse');
+};
+document.getElementById('resetDayBtn').onclick = ()=> resetDayProgress(active);
+
+function performFullReset(){
+  progress = {};
+  lifetimeChecks = 0;
+  xpResetOffset = 0;
+  lastLevel = null;
+  persistentStreakBase = 0;
+  unlockedAchievements = {};
+  weekFullCelebrated = false;
+  historyLog = [];
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  historyLog.unshift({ time: time, text: t('resetLevelLog') });
+  if(historyLog.length > 25) historyLog.pop();
+  render();
+}
+
+let resetLevelArmTimer = null;
+function resetLevel(){
+  const btn = document.getElementById('resetLevelBtn');
+  if(!btn.classList.contains('armed')){
+    btn.classList.add('armed');
+    btn.title = t('resetLevelConfirm');
+    btn.setAttribute('aria-label', t('resetLevelConfirm'));
+    clearTimeout(resetLevelArmTimer);
+    resetLevelArmTimer = setTimeout(()=>{
+      btn.classList.remove('armed');
+      btn.title = t('resetLevel');
+      btn.setAttribute('aria-label', t('resetLevel'));
+    }, 3000);
+    return;
+  }
+  clearTimeout(resetLevelArmTimer);
+  btn.classList.remove('armed');
+  performFullReset();
+}
+document.getElementById('resetLevelBtn').onclick = resetLevel;
+
+document.getElementById('startOverBtn').onclick = ()=>{
+  document.getElementById('startOverConfirm').style.display = 'block';
+  document.getElementById('startOverBtn').style.display = 'none';
+};
+document.getElementById('startOverNoBtn').onclick = ()=>{
+  document.getElementById('startOverConfirm').style.display = 'none';
+  document.getElementById('startOverBtn').style.display = 'block';
+};
+document.getElementById('startOverYesBtn').onclick = ()=>{
+  document.getElementById('startOverConfirm').style.display = 'none';
+  document.getElementById('startOverBtn').style.display = 'block';
+  triggerBlast();
+  performFullReset();
+};
+
+let pendingImportFile = null;
+
+document.getElementById('exportBtn').onclick = exportData;
+document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  pendingImportFile = file;
+  document.getElementById('importConfirmText').textContent = t('importConfirm');
+  document.getElementById('importYesBtn').textContent = t('importConfirmYes');
+  document.getElementById('importNoBtn').textContent = t('importConfirmNo');
+  document.getElementById('importConfirm').style.display = 'block';
+});
+document.getElementById('importYesBtn').onclick = ()=>{
+  document.getElementById('importConfirm').style.display = 'none';
+  if(pendingImportFile){
+    importDataFromFile(pendingImportFile);
+    pendingImportFile = null;
+  }
+};
+document.getElementById('importNoBtn').onclick = ()=>{
+  document.getElementById('importConfirm').style.display = 'none';
+  pendingImportFile = null;
+};
+
+function toggle(dayKey, i){
+  const k = dayKey+'-'+i;
+  const wasOn = !!progress[k];
+  progress[k] = !wasOn;
+  const d = days.find(x=>x.key===dayKey);
+  const label = d.label.charAt(0) + d.label.slice(1).toLowerCase();
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  historyLog.unshift({ time: time, text: (progress[k] ? t('checked') : t('unchecked')) + d.ex[i][0] + ' (' + label + ')' });
+  if(historyLog.length > 25) historyLog.pop();
+  render();
+}
+function doneCount(d){ return d.ex.filter((_,i)=>progress[d.key+'-'+i]).length; }
+
+function toggleDayActive(dayKey){
+  dayActive[dayKey] = !dayActive[dayKey];
+  render();
+}
+
+function setDayMode(d, mode){
+  if(dayMode[d.key] === mode) return;
+  dayMode[d.key] = mode;
+  if(mode === 'default'){
+    d.ex = [];
+  } else {
+    d.ex = (RECOMMENDED[d.key] || []).map(e => e.slice());
+  }
+  Object.keys(progress).forEach(k=>{ if(k.indexOf(d.key+'-') === 0) delete progress[k]; });
+  render();
+}
+
+function toggleCheckAll(d){
+  if(d.ex.length === 0) return;
+  const allDone = doneCount(d) === d.ex.length;
+  const setTo = !allDone;
+  d.ex.forEach((_,i)=>{ progress[d.key+'-'+i] = setTo; });
+  const label = d.label.charAt(0) + d.label.slice(1).toLowerCase();
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  historyLog.unshift({ time: time, text: (setTo ? t('checkedAllLog') : t('uncheckedAllLog')) + ' (' + label + ')' });
+  if(historyLog.length > 25) historyLog.pop();
+  render();
+}
+
+function totalCheckedThisWeek(){
+  let n = 0;
+  days.forEach(d => { d.ex.forEach((_,i)=>{ if(progress[d.key+'-'+i]) n++; }); });
+  return n;
+}
+function totalChecked(){ return lifetimeChecks + totalCheckedThisWeek(); }
+
+function getMondayKey(dt){
+  const dow = dt.getDay();
+  const diffToMonday = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + diffToMonday);
+  const y = monday.getFullYear();
+  const m = String(monday.getMonth()+1).padStart(2,'0');
+  const dd = String(monday.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + dd;
+}
+
+function currentStreak(){
+  let streak = 0;
+  for(const d of days){
+    if(d.ex.length > 0 && doneCount(d) === d.ex.length){ streak++; }
+    else { break; }
+  }
+  return streak;
+}
+
+function totalStreak(){ return persistentStreakBase + currentStreak(); }
+
+function archiveWeekAndReset(){
+  const thisWeekStreak = currentStreak();
+  persistentStreakBase = (thisWeekStreak === 7) ? (persistentStreakBase + 7) : 0;
+  lifetimeChecks += totalCheckedThisWeek();
+  progress = {};
+  days.forEach(d => dayActive[d.key] = true);
+  weekFullCelebrated = false;
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  historyLog.unshift({ time: time, text: t('newWeekLog') });
+  if(historyLog.length > 25) historyLog.pop();
+}
+
+function checkWeekRollover(){
+  const nowKey = getMondayKey(new Date());
+  if(weekStartKey === null){
+    weekStartKey = nowKey;
+    return;
+  }
+  if(nowKey !== weekStartKey){
+    archiveWeekAndReset();
+    weekStartKey = nowKey;
+  }
+}
+
+function startNewWeek(){
+  archiveWeekAndReset();
+  weekStartKey = getMondayKey(new Date());
+  render();
+}
+
+function checkFullWeekCelebration(){
+  if(currentStreak() >= 7 && !weekFullCelebrated){
+    weekFullCelebrated = true;
+    weeksCompletedCount++;
+    triggerConfetti();
+    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const msg = GYM_MOTIVATION[lang][(weeksCompletedCount-1) % GYM_MOTIVATION[lang].length];
+    historyLog.unshift({ time: time, text: msg });
+    if(historyLog.length > 25) historyLog.pop();
+  }
+}
+
+function renderWeekMotivation(){
+  const el = document.getElementById('weekMotivation');
+  if(currentStreak() >= 7 && weeksCompletedCount > 0){
+    const idx = (weeksCompletedCount - 1 + GYM_MOTIVATION[lang].length) % GYM_MOTIVATION[lang].length;
+    const msg = GYM_MOTIVATION[lang][idx];
+    el.innerHTML = '<div class="week-motivation"><span class="wm-icon">&#128170;</span><div><p class="wm-label">' +
+      t('weekMotivationLabel') + '</p><p class="wm-text">' + msg + '</p></div></div>';
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function renderDeloadBanner(){
+  const el = document.getElementById('deloadBanner');
+  if(weeksCompletedCount > 0 && weeksCompletedCount % 4 === 0){
+    el.innerHTML = '<div class="deload-banner"><span class="db-icon">&#128260;</span><div><p class="db-label">' +
+      t('deloadLabel') + '</p><p class="db-text">' + t('deloadText') + '</p></div></div>';
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function saveLog(key, value){
+  const v = (value || '').trim();
+  if(!v) return;
+  const date = new Date().toLocaleDateString([], {month:'short', day:'numeric'});
+  exerciseLogs[key] = { note: v, date: date };
+  render();
+}
+
+const XP_PER_CHECK = 10;
+const XP_PER_LEVEL = 40;
+const TIERS = [
+  { min:1,   max:5,        name:'Rookie' },
+  { min:6,   max:10,       name:'Trainee' },
+  { min:11,  max:15,       name:'Grinder' },
+  { min:16,  max:20,       name:'Fighter' },
+  { min:21,  max:25,       name:'Warrior' },
+  { min:26,  max:30,       name:'Beast' },
+  { min:31,  max:35,       name:'Elite' },
+  { min:36,  max:40,       name:'Gladiator' },
+  { min:41,  max:45,       name:'Champion' },
+  { min:46,  max:50,       name:'Vanguard' },
+  { min:51,  max:55,       name:'Berserker' },
+  { min:56,  max:60,       name:'Titan' },
+  { min:61,  max:65,       name:'Juggernaut' },
+  { min:66,  max:70,       name:'Warlord' },
+  { min:71,  max:75,       name:'Legend' },
+  { min:76,  max:80,       name:'Mythic' },
+  { min:81,  max:85,       name:'Immortal' },
+  { min:86,  max:90,       name:'Ascendant' },
+  { min:91,  max:95,       name:'Godlike' },
+  { min:96,  max:100,      name:'Transcendent' },
+  { min:101, max:Infinity, name:'Eternal' },
+];
+
+function levelInfo(){
+  const xp = Math.max(0, totalChecked() - xpResetOffset) * XP_PER_CHECK;
+  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
+  const xpIntoLevel = xp % XP_PER_LEVEL;
+  const tier = TIERS.find(t => level >= t.min && level <= t.max) || TIERS[TIERS.length-1];
+  const tierIndex = TIERS.indexOf(tier);
+  return { xp, level, xpIntoLevel, tierName: tier.name, tierIndex };
+}
+
+const ACHIEVEMENTS = [
+  { id:'first',  label:{en:'First step', tag:'Unang hakbang'}, check: ()=> totalChecked() >= 1 },
+  { id:'oneday', label:{en:'One day done', tag:'Isang araw tapos'}, check: ()=> days.some(d => d.ex.length>0 && doneCount(d)===d.ex.length) },
+  { id:'streak3', label:{en:'3-day streak', tag:'3-day streak'}, check: ()=> totalStreak() >= 3 },
+  { id:'fullweek', label:{en:'Full week', tag:'Buong linggo'}, check: ()=> days.every(d => d.ex.length>0 && doneCount(d)===d.ex.length) },
+  { id:'ten', label:{en:'10 in one day', tag:'10 sa isang araw'}, check: ()=> days.some(d => doneCount(d) >= 10) },
+];
+
+function hslToHex(h, s, l){
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const toHex = x => Math.round(255 * x).toString(16).padStart(2, '0');
+  return '#' + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
+}
+
+function tierPalette(tierIndex){
+  const lastIndex = TIERS.length - 1;
+  if(tierIndex >= lastIndex){
+    return { main:'#e8b13a', dark:'#a9781a', accent:'#fff1c2' };
+  }
+  const hue = (tierIndex * 137.5) % 360;
+  return {
+    main: hslToHex(hue, 42, 46),
+    dark: hslToHex(hue, 48, 30),
+    accent: hslToHex(hue, 55, 80),
+  };
+}
+
+function avatarSVG(tierIndex){
+  const lastIndex = TIERS.length - 1;
+  const p = tierPalette(tierIndex);
+  const headband   = tierIndex >= 1  ? '<rect x="21" y="8" width="22" height="4" fill="' + p.dark + '"/>' : '';
+  const wristbands = tierIndex >= 5  ? '<rect x="3" y="41" width="13" height="4" fill="' + p.dark + '"/><rect x="48" y="41" width="13" height="4" fill="' + p.dark + '"/>' : '';
+  const belt       = tierIndex >= 9  ? '<rect x="18" y="55" width="28" height="5" rx="2" fill="' + p.dark + '"/>' : '';
+  const cape       = tierIndex >= 13 ? '<path d="M14 32 L5 64 L20 57 Z" fill="' + p.dark + '"/><path d="M50 32 L59 64 L44 57 Z" fill="' + p.dark + '"/>' : '';
+  const spikes     = tierIndex >= 16 ? '<path d="M14 31 L10 22 L20 28 Z" fill="' + p.accent + '"/><path d="M50 31 L54 22 L44 28 Z" fill="' + p.accent + '"/>' : '';
+  const crownSmall = tierIndex >= 18 && tierIndex < lastIndex ? '<path d="M25 6 L28 0 L32 5 L36 0 L39 6 Z" fill="' + p.accent + '" stroke="' + p.dark + '" stroke-width="1"/>' : '';
+  const crownBig   = tierIndex === lastIndex ? '<path d="M22 6 L26 -1 L32 5 L38 -1 L42 6 Z" fill="' + p.accent + '" stroke="' + p.dark + '" stroke-width="1"/>' : '';
+  const glow       = tierIndex === lastIndex ? '<circle cx="32" cy="34" r="34" fill="' + p.accent + '" opacity="0.35"/>' : '';
+  const patch      = tierIndex === 0 ? '<rect x="26" y="43" width="8" height="6" fill="' + p.dark + '" opacity="0.6"/>' : '';
+  return '<svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">' +
+    glow + cape +
+    '<circle cx="32" cy="16" r="11" fill="#d8b892"/>' +
+    headband + crownSmall + crownBig +
+    '<rect x="28" y="25" width="8" height="6" fill="#d8b892"/>' +
+    '<polygon points="14,31 50,31 44,58 20,58" fill="' + p.main + '"/>' +
+    spikes +
+    '<path d="M20 38 Q32 45 44 38" stroke="' + p.dark + '" stroke-width="2" fill="none" opacity="0.6"/>' +
+    '<rect x="26" y="47" width="12" height="2" fill="' + p.dark + '" opacity="0.4"/>' +
+    '<rect x="26" y="52" width="12" height="2" fill="' + p.dark + '" opacity="0.4"/>' +
+    patch +
+    '<circle cx="10" cy="36" r="9" fill="' + p.main + '"/>' +
+    '<rect x="4" y="43" width="11" height="18" rx="4" fill="' + p.main + '"/>' +
+    '<circle cx="54" cy="36" r="9" fill="' + p.main + '"/>' +
+    '<rect x="49" y="43" width="11" height="18" rx="4" fill="' + p.main + '"/>' +
+    wristbands + belt +
+    '<rect x="19" y="58" width="11" height="19" rx="3" fill="' + p.dark + '"/>' +
+    '<rect x="34" y="58" width="11" height="19" rx="3" fill="' + p.dark + '"/>' +
+  '</svg>';
+}
+
+function triggerConfetti(){
+  const layer = document.createElement('div');
+  layer.className = 'confetti-layer';
+  document.body.appendChild(layer);
+  const colors = ['#D6431C','#e8b13a','#2f6fb0','#639922','#D4537E'];
+  for(let i=0;i<32;i++){
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = (Math.random()*100)+'%';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDelay = (Math.random()*0.35)+'s';
+    piece.style.animationDuration = (1.5+Math.random()*0.9)+'s';
+    layer.appendChild(piece);
+  }
+  setTimeout(()=> layer.remove(), 2800);
+}
+
+function triggerBlast(){
+  const layer = document.createElement('div');
+  layer.className = 'blast-layer';
+  document.body.appendChild(layer);
+
+  const flash = document.createElement('div');
+  flash.className = 'blast-flash';
+  layer.appendChild(flash);
+
+  const ring1 = document.createElement('div');
+  ring1.className = 'blast-ring';
+  layer.appendChild(ring1);
+
+  const ring2 = document.createElement('div');
+  ring2.className = 'blast-ring';
+  ring2.style.animationDelay = '.1s';
+  layer.appendChild(ring2);
+
+  const shardCount = 22;
+  for(let i=0;i<shardCount;i++){
+    const shard = document.createElement('div');
+    shard.className = 'blast-shard';
+    const ang = (360/shardCount)*i + (Math.random()*14-7);
+    shard.style.setProperty('--ang', ang+'deg');
+    shard.style.animationDelay = (Math.random()*0.08)+'s';
+    layer.appendChild(shard);
+  }
+
+  const wrapEl = document.getElementById('appWrap');
+  wrapEl.classList.remove('shaking');
+  void wrapEl.offsetWidth;
+  wrapEl.classList.add('shaking');
+
+  setTimeout(()=> wrapEl.classList.remove('shaking'), 550);
+  setTimeout(()=> layer.remove(), 900);
+}
+
+const RING_R = 30;
+const RING_C = 2 * Math.PI * RING_R;
+
+function renderLevel(){
+  const info = levelInfo();
+  const leveledUp = lastLevel !== null && info.level > lastLevel;
+  if(leveledUp){ triggerConfetti(); }
+  lastLevel = info.level;
+  const avatarBox = document.getElementById('avatarBox');
+  avatarBox.innerHTML = avatarSVG(info.tierIndex);
+  if(leveledUp){
+    avatarBox.classList.remove('bounce');
+    void avatarBox.offsetWidth;
+    avatarBox.classList.add('bounce');
+  }
+  document.getElementById('levelName').textContent = 'LEVEL ' + info.level;
+  document.getElementById('levelTag').textContent = info.tierName;
+  document.getElementById('xpLabel').textContent = info.xpIntoLevel + ' / ' + XP_PER_LEVEL + ' XP';
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDasharray = RING_C;
+  ring.style.strokeDashoffset = RING_C - (info.xpIntoLevel / XP_PER_LEVEL) * RING_C;
+}
+
+function renderBadges(){
+  // Badge shelf UI removed.
+}
+
+function renderRecap(){
+  const info = levelInfo();
+  const daysDone = days.filter(d => d.ex.length>0 && doneCount(d)===d.ex.length).length;
+  const stats = [
+    [daysDone + '/7', t('daysDone')],
+    [totalChecked(), t('exChecked')],
+    [info.xp, t('totalXp')],
+    ['LVL ' + info.level, t('curLevel')],
+  ];
+  document.getElementById('recapGrid').innerHTML = stats.map(s=>{
+    return '<div class="recap-stat"><div class="recap-num">' + s[0] + '</div><div class="recap-label">' + s[1] + '</div></div>';
+  }).join('');
+}
+
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  if(historyLog.length === 0){
+    list.innerHTML = '<p class="history-empty">' + t('historyEmpty') + '</p>';
+    return;
+  }
+  list.innerHTML = historyLog.map(h=>{
+    return '<div class="history-item">' + h.time + ' &nbsp;&mdash;&nbsp; ' + h.text + '</div>';
+  }).join('');
+}
+
+function startEdit(dayKey, i){ editing = dayKey+'-'+i; render(); }
+function cancelEdit(){ editing = null; render(); }
+function saveEdit(d, i){
+  const nameEl = document.getElementById('edit-name');
+  const repsEl = document.getElementById('edit-reps');
+  const noteEl = document.getElementById('edit-note');
+  const errEl = document.getElementById('edit-error');
+  const name = nameEl.value.trim();
+  const reps = repsEl.value.trim();
+  const note = noteEl.value.trim();
+  if(!name){ errEl.classList.add('show'); errEl.textContent = t('errName'); return; }
+  d.ex[i] = [name, reps || '\u2014', note];
+  editing = null;
+  render();
+}
+function deleteEx(d, i){
+  d.ex.splice(i,1);
+  const shifted = {};
+  Object.keys(progress).forEach(k=>{
+    if(!k.startsWith(d.key+'-')) { shifted[k] = progress[k]; return; }
+    const idx = parseInt(k.split('-')[1]);
+    if(idx < i) shifted[k] = progress[k];
+    else if(idx > i) shifted[d.key+'-'+(idx-1)] = progress[k];
+  });
+  progress = shifted;
+  render();
+}
+function openAdd(dayKey){ addOpen[dayKey] = true; openTutorial = null; render(); }
+function closeAdd(dayKey){ addOpen[dayKey] = false; openTutorial = null; render(); }
+function resetDayProgress(dayKey){
+  const d = days.find(x=>x.key===dayKey);
+  d.ex.forEach((_,i)=>{ delete progress[dayKey+'-'+i]; });
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  historyLog.unshift({ time: time, text: t('resetDayLog') + d.title[lang] });
+  if(historyLog.length > 25) historyLog.pop();
+  render();
+}
+function saveAdd(d){
+  const nameEl = document.getElementById('add-name');
+  const repsEl = document.getElementById('add-reps');
+  const noteEl = document.getElementById('add-note');
+  const errEl = document.getElementById('add-error');
+  const name = nameEl.value.trim();
+  const reps = repsEl.value.trim();
+  const note = noteEl.value.trim();
+  if(!name){ errEl.classList.add('show'); errEl.textContent = t('errName'); return; }
+  d.ex.push([name, reps || '\u2014', note]);
+  addOpen[d.key] = false;
+  render();
+}
+function fillSuggestion(name, reps){
+  const nameEl = document.getElementById('add-name');
+  const repsEl = document.getElementById('add-reps');
+  if(nameEl) nameEl.value = name;
+  if(repsEl) repsEl.value = reps;
+}
+
+function render(){
+  checkWeekRollover();
+  checkFullWeekCelebration();
+  renderLevel();
+  renderBadges();
+  renderRecap();
+  renderHistory();
+  renderStreakCalendar();
+  renderWeekMotivation();
+  renderDeloadBanner();
+
+  const strip = document.getElementById('strip');
+  strip.innerHTML = days.map(d=>{
+    const full = d.ex.length>0 && doneCount(d)===d.ex.length && dayActive[d.key];
+    const offClass = dayActive[d.key] ? '' : 'inactive-day';
+    return '<div class="daybtn ' + (d.key===active?'active':'') + ' ' + offClass + '" data-day="' + d.key + '">' + d.label + '<span class="tick">' + (full?'&#128293;':'&nbsp;') + '</span></div>';
+  }).join('');
+  strip.querySelectorAll('.daybtn').forEach(b=>{
+    b.onclick = ()=>{
+      if(b.getAttribute('data-day') === active) return;
+      active = b.getAttribute('data-day'); editing = null; openTutorial = null; render();
+      const cardEl = document.querySelector('.card');
+      cardEl.classList.remove('day-fade');
+      void cardEl.offsetWidth;
+      cardEl.classList.add('day-fade');
+    };
+  });
+
+  document.getElementById('lblWeekTotal').textContent = t('lblWeekTotal');
+  document.getElementById('lblDoneToday').textContent = t('lblDoneToday');
+  document.getElementById('recapHead').textContent = t('recapHead');
+  document.getElementById('historyHead').textContent = t('historyHead');
+  document.getElementById('dataToolsHead').textContent = t('dataToolsHead');
+  document.getElementById('resetLogBtn').title = t('resetLog');
+  document.getElementById('resetLogBtn').setAttribute('aria-label', t('resetLog'));
+  document.getElementById('resetDayBtn').title = t('resetDay');
+  document.getElementById('resetDayBtn').setAttribute('aria-label', t('resetDay'));
+  document.getElementById('startOverBtn').textContent = t('startOverBtn');
+  document.getElementById('startOverText').textContent = t('startOverText');
+  document.getElementById('startOverYesBtn').textContent = t('startOverYes');
+  document.getElementById('startOverNoBtn').textContent = t('startOverNo');
+  document.getElementById('backupHint').textContent = t('backupHint');
+  document.getElementById('exportBtn').textContent = t('exportBtn');
+  document.getElementById('importBtn').textContent = t('importBtn');
+  document.getElementById('importConfirmText').textContent = t('importConfirm');
+  document.getElementById('importYesBtn').textContent = t('importConfirmYes');
+  document.getElementById('importNoBtn').textContent = t('importConfirmNo');
+
+  document.getElementById('appToolsHead').textContent = t('appToolsHead');
+  document.getElementById('installHint').textContent = t('installHint');
+  document.getElementById('installBtn').textContent = t('installBtn');
+  document.getElementById('reminderLabel').textContent = t('reminderLabel');
+  document.getElementById('reminderHint').textContent = t('reminderHint');
+  document.getElementById('summaryHead').textContent = t('summaryHead');
+  document.getElementById('summaryHint').textContent = t('summaryHint');
+  document.getElementById('summaryOpenBtn').textContent = t('summaryBtn');
+  document.getElementById('summaryPrintBtn').textContent = t('summaryPrint');
+  document.getElementById('summaryShareBtn').textContent = t('summaryShare');
+  updateReminderStatusText();
+
+  if(!document.getElementById('resetLevelBtn').classList.contains('armed')){
+    document.getElementById('resetLevelBtn').title = t('resetLevel');
+    document.getElementById('resetLevelBtn').setAttribute('aria-label', t('resetLevel'));
+  }
+
+  const d = days.find(x=>x.key===active);
+  document.getElementById('dayTitle').textContent = d.title[lang];
+  document.getElementById('dayCount').textContent = doneCount(d)+'/'+d.ex.length;
+  const defaultTag = document.querySelector('.tag-default');
+  const recommendedTag = document.querySelector('.tag-recommended');
+  defaultTag.classList.toggle('active', dayMode[d.key] === 'default');
+  recommendedTag.classList.toggle('active', dayMode[d.key] === 'recommended');
+  defaultTag.onclick = ()=> setDayMode(d, 'default');
+  recommendedTag.onclick = ()=> setDayMode(d, 'recommended');
+  document.getElementById('dayNote').textContent = d.note[lang];
+  const WARMUP_DAYS = ['mon','tue','wed','fri','sat'];
+  document.getElementById('warmupTip').innerHTML = (WARMUP_DAYS.indexOf(d.key) !== -1 && d.ex.length > 0) ?
+    '<div class="warmup-tip"><span class="wt-icon">&#9200;</span><span>' + t('warmupText') + '</span></div>' : '';
+
+  const checkAllBtn = document.getElementById('checkAllBtn');
+  const allDoneThisDay = d.ex.length > 0 && doneCount(d) === d.ex.length;
+  const checkAllLabel = allDoneThisDay ? t('uncheckAll') : t('checkAll');
+  checkAllBtn.title = checkAllLabel;
+  checkAllBtn.setAttribute('aria-label', checkAllLabel);
+  checkAllBtn.style.opacity = d.ex.length === 0 ? '.4' : '1';
+  checkAllBtn.style.pointerEvents = d.ex.length === 0 ? 'none' : 'auto';
+  checkAllBtn.onclick = ()=> toggleCheckAll(d);
+
+  const isActive = dayActive[d.key];
+  const inactiveBtn = document.getElementById('inactiveBtn');
+  inactiveBtn.textContent = isActive ? t('markRest') : t('makeActive');
+  inactiveBtn.classList.toggle('is-off', !isActive);
+  inactiveBtn.onclick = ()=> toggleDayActive(d.key);
+
+  document.querySelector('.card').classList.toggle('dimmed', !isActive);
+  document.getElementById('restBanner').innerHTML = isActive ? '' :
+    '<div class="rest-banner">' + t('restBanner') + '</div>';
+
+  let rowsHtml = d.ex.map((e,i)=>{
+    const k = d.key+'-'+i;
+    if(editing === k){
+      return '<div class="add-form open">' +
+        '<input class="fname" id="edit-name" value="' + e[0] + '" placeholder="' + t('namePh') + '">' +
+        '<input class="freps" id="edit-reps" value="' + e[1] + '" placeholder="' + t('repsPh') + '">' +
+        '<input class="fnote" id="edit-note" value="' + noteText(e) + '" placeholder="' + t('notePh') + '">' +
+        '<button class="fsave" id="edit-save-btn">Save</button>' +
+        '<button class="icon-btn" id="edit-cancel-btn">&#10005;</button>' +
+        '</div>' +
+        '<p class="form-error" id="edit-error">' + t('errName') + '</p>';
+    }
+    const on = !!progress[k];
+    const noteHtml = noteText(e) ? '<div class="ex-note">' + noteText(e) + '</div>' : '';
+    const logEntry = exerciseLogs[k];
+    const lastLogHtml = logEntry ? '<span class="ex-log-last">' + t('logLast') + logEntry.note + ' <span class="ex-log-date">(' + logEntry.date + ')</span></span>' : '';
+    const logHtml = '<div class="ex-log">' + lastLogHtml +
+      '<input class="ex-log-input" data-logkey="' + k + '" placeholder="' + t('logPh') + '">' + '</div>';
+    return '<div class="ex ' + (on?'done':'') + '" data-i="' + i + '">' +
+      '<div class="box" data-check="' + i + '"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>' +
+      '<div class="ex-main" data-check="' + i + '"><span class="ex-name">' + e[0] + '</span>' + noteHtml + '</div>' +
+      '<span class="ex-reps">' + e[1] + '</span>' +
+      '<button class="icon-btn" data-edit="' + i + '" aria-label="Edit">&#9998;</button>' +
+      '<button class="icon-btn" data-del="' + i + '" aria-label="Delete">&#10005;</button>' +
+      '</div>' +
+      '<div class="ex-log-wrap">' + logHtml + '</div>';
+  }).join('');
+
+  const isAdding = !!addOpen[d.key];
+  const suggestions = SUGGESTIONS[d.key] || [];
+  const tutorialHtml = (isAdding && openTutorial && openTutorial.day===d.key && suggestions[openTutorial.idx]) ?
+    '<div class="ex-note" style="flex-basis:100%;">' + suggestions[openTutorial.idx][2][lang] + '</div>' : '';
+  const suggestHtml = suggestions.length ?
+    '<span class="suggest-label">' + t('suggestLabel') + '</span>' +
+    '<div class="suggest-chips">' + suggestions.map((s,si)=>
+      '<span class="suggest-chip" data-sug="' + si + '">' + s[0] + ' &middot; ' + s[1] +
+        ' <button class="sug-info" data-info="' + si + '" title="' + t('howTo') + '" aria-label="' + t('howTo') + '">&#9432;</button></span>'
+    ).join('') + '</div>' + tutorialHtml
+    : '';
+  rowsHtml += isAdding
+    ? '<div class="add-form open">' +
+        suggestHtml +
+        '<input class="fname" id="add-name" placeholder="' + t('namePh') + '">' +
+        '<input class="freps" id="add-reps" placeholder="' + t('repsPh') + '">' +
+        '<input class="fnote" id="add-note" placeholder="' + t('notePh') + '">' +
+        '<button class="fsave" id="add-save-btn">Save</button>' +
+        '<button class="icon-btn" id="add-cancel-btn">&#10005;</button>' +
+      '</div>' +
+      '<p class="form-error" id="add-error">' + t('errName') + '</p>'
+    : '<div class="add-row" id="addRowBtn"><span class="plus-circle">+</span>' + t('addRow') + '</div>';
+
+  document.getElementById('exList').innerHTML = rowsHtml;
+
+  document.querySelectorAll('[data-check]').forEach(el=>{
+    el.onclick = ()=> toggle(d.key, parseInt(el.getAttribute('data-check')));
+  });
+  document.querySelectorAll('[data-edit]').forEach(el=>{
+    el.onclick = (ev)=>{ ev.stopPropagation(); startEdit(d.key, parseInt(el.getAttribute('data-edit'))); };
+  });
+  document.querySelectorAll('[data-del]').forEach(el=>{
+    el.onclick = (ev)=>{ ev.stopPropagation(); deleteEx(d, parseInt(el.getAttribute('data-del'))); };
+  });
+  document.querySelectorAll('.ex-log-input').forEach(el=>{
+    el.onclick = (ev)=> ev.stopPropagation();
+    el.onblur = ()=> saveLog(el.getAttribute('data-logkey'), el.value);
+    el.onkeydown = (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); el.blur(); } };
+  });
+  const editSaveBtn = document.getElementById('edit-save-btn');
+  if(editSaveBtn) editSaveBtn.onclick = ()=> saveEdit(d, parseInt(editing.split('-')[1]));
+  const editCancelBtn = document.getElementById('edit-cancel-btn');
+  if(editCancelBtn) editCancelBtn.onclick = cancelEdit;
+
+  const addRowBtn = document.getElementById('addRowBtn');
+  if(addRowBtn) addRowBtn.onclick = ()=> openAdd(d.key);
+  const addSaveBtn = document.getElementById('add-save-btn');
+  if(addSaveBtn) addSaveBtn.onclick = ()=> saveAdd(d);
+  const addCancelBtn = document.getElementById('add-cancel-btn');
+  if(addCancelBtn) addCancelBtn.onclick = ()=> closeAdd(d.key);
+  document.querySelectorAll('[data-sug]').forEach(el=>{
+    el.onclick = (ev)=>{
+      if(ev.target.closest('[data-info]')) return;
+      const s = suggestions[parseInt(el.getAttribute('data-sug'))];
+      fillSuggestion(s[0], s[1]);
+    };
+  });
+  document.querySelectorAll('[data-info]').forEach(el=>{
+    el.onclick = (ev)=>{
+      ev.stopPropagation();
+      const idx = parseInt(el.getAttribute('data-info'));
+      openTutorial = (openTutorial && openTutorial.day===d.key && openTutorial.idx===idx) ? null : {day:d.key, idx:idx};
+      render();
+    };
+  });
+
+  let weekDone=0, weekTotal=0;
+  days.forEach(dd=>{ weekDone += doneCount(dd); weekTotal += dd.ex.length; });
+  document.getElementById('weekTotal').textContent = weekDone+'/'+weekTotal;
+  document.getElementById('todayTotal').textContent = doneCount(d)+'/'+d.ex.length;
+  document.getElementById('streakFlag').textContent = totalStreak() + (totalStreak()>=3 ? t('onFire') : '');
+
+  saveState();
+}
+
+function setTheme(isDark){
+  const body = document.body;
+  body.setAttribute('data-theme', isDark ? 'dark':'light');
+  document.getElementById('themeLabel').textContent = isDark ? 'Dark':'Light';
+  document.getElementById('themeDot').innerHTML = isDark ? '&#9789;' : '&#9728;';
+  renderSwatches();
+  saveState();
+}
+
+document.getElementById('themeToggle').onclick = ()=>{
+  const isDark = document.body.getAttribute('data-theme')==='dark';
+  setTheme(!isDark);
+};
+
+function setSound(enabled){
+  soundEnabled = enabled;
+  document.getElementById('soundLabel').textContent = enabled ? 'Sound' : 'Muted';
+  document.getElementById('soundDot').innerHTML = enabled ? '&#128266;' : '&#128263;';
+  document.getElementById('soundToggle').classList.toggle('muted', !enabled);
+  saveState();
+}
+document.getElementById('soundToggle').onclick = ()=>{
+  setSound(!soundEnabled);
+  if(soundEnabled) playClickSound();
+};
+
+document.getElementById('charName').addEventListener('input', (e)=>{
+  document.getElementById('charName').value = e.target.value;
+  saveState();
+});
+
+document.getElementById('startTrainingBtn').onclick = ()=>{
+  document.getElementById('frontPage').classList.add('hide');
+  document.getElementById('appWrap').classList.add('reveal');
+};
+
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; }
+  }
+  return audioCtx;
+}
+function playClickSound(){
+  if(!soundEnabled) return;
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  if(ctx.state === 'suspended') ctx.resume();
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(340, now);
+  osc.frequency.exponentialRampToValueAtTime(110, now + 0.08);
+  gain.gain.setValueAtTime(0.16, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.1);
+}
+const CLICK_SOUND_SELECTOR = 'button, .theme-toggle, #langTagBtn, #langEnBtn, .daybtn, .tag-pill, .swatch, [data-check], [data-sug], [data-info]';
+document.addEventListener('click', (e)=>{
+  if(e.target.closest(CLICK_SOUND_SELECTOR)){
+    playClickSound();
+  }
+}, true);
+
+const DISCIPLINE_QUOTES = {
+  en: [
+    'Discipline is choosing between what you want now and what you want most.',
+    'Motivation gets you started. Discipline keeps you going.',
+    'You don\u2019t have to be great to start, but you have to show up to be great.',
+    'Discipline is the bridge between goals and results.',
+  ],
+  tag: [
+    'Ang disiplina ay ang pagpili sa gusto mo ngayon laban sa gusto mo talaga.',
+    'Ang motivation ang nagpapasimula, pero ang disiplina ang nagpapatuloy.',
+    'Hindi mo kailangang maging perpekto para magsimula, pero kailangan mong sumipot para maging dakila.',
+    'Ang disiplina ang tulay patungo sa mga pangarap mo.',
+  ],
+};
+function renderFrontQuote(){
+  const list = DISCIPLINE_QUOTES[lang] || DISCIPLINE_QUOTES.en;
+  const pick = list[Math.floor(Math.random()*list.length)];
+  document.getElementById('frontQuote').textContent = '\u201C' + pick + '\u201D';
+}
+
+/* =========================================================
+   Installable app (Add to Home Screen)
+   ========================================================= */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* not hosted, or offline first load */ });
+  });
+}
+
+let deferredInstallPrompt = null;
+const isStandalone = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installBtn');
+  btn.classList.remove('hide');
+});
+
+document.getElementById('installBtn').onclick = async ()=>{
+  const statusEl = document.getElementById('installStatus');
+  if(!deferredInstallPrompt){
+    statusEl.textContent = t('installUnavailable');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  const choice = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('installBtn').classList.add('hide');
+  if(choice && choice.outcome === 'accepted'){
+    statusEl.textContent = t('installedOk');
+  }
+};
+
+window.addEventListener('appinstalled', ()=>{
+  document.getElementById('installBtn').classList.add('hide');
+  document.getElementById('installStatus').textContent = t('installedOk');
+});
+
+if(isStandalone()){
+  document.getElementById('installBtn').classList.add('hide');
+  document.getElementById('installStatus').textContent = t('installedAlready');
+}
+
+/* =========================================================
+   Evening check-in reminder
+   ========================================================= */
+function todayKeyFromDate(dt){ return dt.toISOString().slice(0,10); }
+function todayDayIndex(){ return (new Date().getDay() + 6) % 7; } // 0=Mon..6=Sun, matches `days` order
+
+function updateReminderStatusText(){
+  const statusEl = document.getElementById('reminderStatus');
+  if(!reminderEnabled){ statusEl.textContent = ''; statusEl.classList.remove('warn'); return; }
+  if(typeof Notification !== 'undefined' && Notification.permission === 'denied'){
+    statusEl.textContent = t('reminderPermNeeded');
+    statusEl.classList.add('warn');
+  } else {
+    statusEl.textContent = t('reminderSet') + reminderTime;
+    statusEl.classList.remove('warn');
+  }
+}
+
+function applyReminderUI(){
+  document.getElementById('reminderSwitch').classList.toggle('on', reminderEnabled);
+  document.getElementById('reminderSwitch').setAttribute('aria-checked', String(reminderEnabled));
+  document.getElementById('reminderTimeRow').classList.toggle('hide', !reminderEnabled);
+  document.getElementById('reminderTime').value = reminderTime;
+  updateReminderStatusText();
+}
+
+async function enableReminders(){
+  if(typeof Notification === 'undefined'){
+    document.getElementById('reminderStatus').textContent = t('installUnavailable');
+    return false;
+  }
+  let perm = Notification.permission;
+  if(perm === 'default'){ perm = await Notification.requestPermission(); }
+  if(perm !== 'granted'){
+    reminderEnabled = false;
+    applyReminderUI();
+    document.getElementById('reminderStatus').textContent = t('reminderPermNeeded');
+    document.getElementById('reminderStatus').classList.add('warn');
+    return false;
+  }
+  // Best-effort: only works on installed PWAs on Chromium/Android; silently
+  // ignored elsewhere. The foreground check below is what covers everyone.
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.ready.then((reg)=>{
+      if('periodicSync' in reg){
+        reg.periodicSync.register('pf24-checkin-reminder', { minInterval: 20 * 60 * 60 * 1000 }).catch(()=>{});
+      } else if('sync' in reg){
+        reg.sync.register('pf24-checkin-reminder').catch(()=>{});
+      }
+    }).catch(()=>{});
+  }
+  return true;
+}
+
+document.getElementById('reminderSwitch').onclick = async ()=>{
+  if(!reminderEnabled){
+    const ok = await enableReminders();
+    reminderEnabled = ok;
+  } else {
+    reminderEnabled = false;
+  }
+  applyReminderUI();
+  saveState();
+};
+document.getElementById('reminderSwitch').onkeydown = (e)=>{
+  if(e.key==='Enter' || e.key===' '){ e.preventDefault(); document.getElementById('reminderSwitch').click(); }
+};
+document.getElementById('reminderTime').addEventListener('change', (e)=>{
+  reminderTime = e.target.value || '19:00';
+  updateReminderStatusText();
+  saveState();
+});
+
+function checkedInToday(){
+  const d = days[todayDayIndex()];
+  if(!d) return true;
+  if(!dayActive[d.key]) return true; // marked as rest/off — nothing to remind about
+  if(d.ex.length === 0) return true;
+  return doneCount(d) > 0;
+}
+
+async function maybeFireForegroundReminder(){
+  if(!reminderEnabled) return;
+  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  const now = new Date();
+  const [hh, mm] = (reminderTime || '19:00').split(':').map(Number);
+  const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm || 0);
+  const key = todayKeyFromDate(now);
+  if(now < target) return;
+  if(reminderShownDate === key) return;
+  if(checkedInToday()) return;
+  reminderShownDate = key;
+  saveState();
+  const body = lang==='tag'
+    ? 'Huwag kalimutan ang check-in mo ngayong araw!'
+    : 'Don\u2019t forget to check in today!';
+  if('serviceWorker' in navigator && navigator.serviceWorker.controller){
+    navigator.serviceWorker.ready.then((reg)=> reg.showNotification('Project Fitness XXIV', {
+      body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'pf24-checkin', renotify: true
+    })).catch(()=>{});
+  } else {
+    try{ new Notification('Project Fitness XXIV', { body, icon: 'icon-192.png' }); }catch(e){ /* ignore */ }
+  }
+}
+
+/* =========================================================
+   Weekly summary — view / print / share
+   ========================================================= */
+function renderSummary(){
+  const info = levelInfo();
+  const daysDone = days.filter(d => d.ex.length>0 && doneCount(d)===d.ex.length).length;
+
+  document.getElementById('psTitle').textContent = t('summaryTitle');
+  const now = new Date();
+  document.getElementById('psSub').textContent = MONTH_NAMES[lang][now.getMonth()] + ' ' + now.getFullYear() + ' \u2014 ' + t('streakCalHead');
+
+  const stats = [
+    [daysDone + '/7', t('daysDone')],
+    [totalChecked(), t('exChecked')],
+    ['LVL ' + info.level, t('curLevel')],
+    [totalStreak(), 'Streak'],
+  ];
+  document.getElementById('psStats').innerHTML = stats.map(s=>
+    '<div class="ps-stat"><div class="ps-stat-num">' + s[0] + '</div><div class="ps-stat-label">' + s[1] + '</div></div>'
+  ).join('');
+
+  document.getElementById('psDays').innerHTML = days.map(d=>{
+    const total = d.ex.length;
+    const done = doneCount(d);
+    const isRest = total === 0 || !dayActive[d.key];
+    const full = total > 0 && done === total;
+    const countText = isRest ? t('summaryRest') : (done + '/' + total + ' ' + t('summaryDone'));
+    return '<div class="ps-day ' + (full?'full':'') + '"><span class="ps-day-name">' + d.label + ' \u2014 ' + d.title[lang] + '</span><span class="ps-day-count">' + countText + '</span></div>';
+  }).join('');
+
+  const qlist = QUOTES[lang] || QUOTES.en;
+  document.getElementById('psQuote').textContent = '\u201C' + qlist[Math.floor(Math.random()*qlist.length)] + '\u201D';
+}
+
+function openSummary(){
+  renderSummary();
+  document.getElementById('summaryOverlay').classList.add('show');
+}
+function closeSummary(){
+  document.getElementById('summaryOverlay').classList.remove('show');
+}
+document.getElementById('summaryOpenBtn').onclick = openSummary;
+document.getElementById('summaryCloseX').onclick = closeSummary;
+document.getElementById('summaryOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'summaryOverlay') closeSummary();
+});
+
+document.getElementById('summaryPrintBtn').onclick = ()=> window.print();
+
+document.getElementById('summaryShareBtn').onclick = async ()=>{
+  const statusText = document.getElementById('summaryOpenBtn'); // reuse hint area implicitly via title fallback
+  const target = document.getElementById('printSummary');
+  const shareBtn = document.getElementById('summaryShareBtn');
+  const originalLabel = shareBtn.textContent;
+  shareBtn.disabled = true;
+  shareBtn.textContent = t('summarySharing');
+  try{
+    if(typeof html2canvas !== 'function'){ throw new Error('html2canvas unavailable'); }
+    const canvas = await html2canvas(target, {
+      backgroundColor: getComputedStyle(document.body).getPropertyValue('--card').trim() || '#ffffff',
+      scale: 2
+    });
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const file = new File([blob], 'project-fitness-xxiv-weekly-summary.png', { type: 'image/png' });
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({ files: [file], title: t('summaryTitle') });
+      shareBtn.textContent = t('summarySharedOk');
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'project-fitness-xxiv-weekly-summary.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      shareBtn.textContent = t('summaryShareErr');
+    }
+  }catch(err){
+    shareBtn.textContent = t('summaryShareErr');
+  }
+  setTimeout(()=>{ shareBtn.textContent = originalLabel; shareBtn.disabled = false; }, 2200);
+};
+
+loadState();
+setTheme(document.body.getAttribute('data-theme')==='dark');
+setSound(soundEnabled);
+document.getElementById('langTagBtn').classList.toggle('on', lang==='tag');
+document.getElementById('langEnBtn').classList.toggle('on', lang==='en');
+updateClock();
+renderQuote();
+renderFrontQuote();
+renderSwatches();
+applyReminderUI();
+maybeFireForegroundReminder();
+setInterval(maybeFireForegroundReminder, 5 * 60 * 1000);
+render();
+</script>
+</body>
+</html>
